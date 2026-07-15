@@ -45,3 +45,6 @@ Thumbs.db
 
 # Generated design-token artifacts (npm run tokens:build) — issue 005
 /tokens/dist/
+
+# Generated pseudo-localization bundle (npm run i18n:pseudo) — issue 065
+/projects/storefront/src/assets/i18n/pseudo/

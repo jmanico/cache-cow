@@ -1,0 +1,46 @@
+/* 404 "Signal lost" (DESIGN.md 5.1). Tokens only (rule 8). */
+.not-found {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 64px 24px;
+}
+
+.arcs {
+  display: block;
+}
+
+.arc {
+  fill: none;
+  stroke: var(--cc-color-ember-500);
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+.not-found-title {
+  margin: 24px 0 0;
+  font-family: var(--cc-font-display), serif;
+  font-weight: var(--cc-weight-body);
+  font-size: var(--cc-type-size-6);
+  line-height: 1.15;
+  color: var(--cc-color-char-900);
+  overflow-wrap: break-word;
+}
+
+.not-found-body {
+  margin: 16px 0 0;
+  max-width: 60ch;
+  color: var(--cc-color-bark-700);
+  overflow-wrap: break-word;
+}
+
+.not-found-home {
+  display: inline-block;
+  margin-top: 24px;
+  color: var(--cc-color-ember-700); /* 4.5:1 body-size colored text (DESIGN.md 3.2) */
+  text-decoration: underline;
+}
+
+.not-found-home:focus-visible {
+  outline: 2px solid var(--cc-color-ember-500);
+  outline-offset: 2px;
+}

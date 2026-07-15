@@ -1,10 +1,9 @@
 <!--
-  Minimal bootstrap shell only (issue 004): no feature pages here.
-  CSP-compatible by construction: no inline event handlers, no inline styles
-  (SECURITY.md, HTTP boundary rule 2).
+  Root shell (issue 063). CSP-compatible: no inline event handlers, no inline
+  styles (SECURITY.md, HTTP boundary rule 2); no [innerHTML] (rule 5).
 -->
-<main class="shell">
-  <h1>Cache Cow — {{ title() }}</h1>
-  <p class="shell-note">Consumer storefront shell (SSR + hydration).</p>
+<app-header />
+<main class="page-main">
+  <router-outlet />
 </main>
-<router-outlet />
+<app-footer />

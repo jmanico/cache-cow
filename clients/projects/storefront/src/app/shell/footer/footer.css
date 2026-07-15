@@ -1,0 +1,45 @@
+/*
+ * Char footer (DESIGN.md 6 page anatomy). Wordmark-only treatment (2.2):
+ * display face token, Paper on Char. Token-sourced values only
+ * (Dependency rule 8).
+ */
+.site-footer {
+  background: var(--cc-color-char-900);
+  color: var(--cc-color-paper-100);
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 48px 24px;
+}
+
+.wordmark {
+  margin: 0;
+  font-family: var(--cc-font-display), serif;
+  font-size: var(--cc-type-size-4);
+  line-height: 1.2;
+  color: var(--cc-color-paper-100);
+}
+
+.tagline {
+  margin: 8px 0 0;
+  font-family: var(--cc-font-data), monospace;
+  font-weight: var(--cc-weight-subhead);
+  font-size: var(--cc-type-size-1);
+  letter-spacing: 0.12em;
+  color: var(--cc-color-ember-500);
+}
+
+.legal {
+  margin: 24px 0 0;
+  font-size: var(--cc-type-size-1);
+  color: var(--cc-color-smoke-400);
+  overflow-wrap: break-word; /* 130% expansion wraps, never clips (CC-I18N-005) */
+}
+
+@media (max-width: 480px) {
+  .footer-inner {
+    padding: 32px 16px;
+  }
+}

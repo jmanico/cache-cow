@@ -1,0 +1,41 @@
+<!--
+  CSP-compatible by construction: no inline event handlers, no inline styles
+  (SECURITY.md, HTTP boundary rule 2). All strings via the i18n service
+  (CC-I18N-002); no [innerHTML] anywhere (Input validation rule 5).
+-->
+<header class="site-header">
+  <a class="logo-link" routerLink="/">
+    <!-- Horizontal lockup, >= 200px wide so the tag line variant is correct (DESIGN.md 2.2) -->
+    <img
+      class="logo"
+      src="cache-cow-logo.svg"
+      width="217"
+      height="60"
+      [alt]="i18n.t('shell.header.logoAlt')"
+    />
+  </a>
+  <nav class="switchers" aria-label="Market and language">
+    <!-- Two independent controls (DESIGN.md 7): market drives catalog/currency/
+         compliance; language drives strings. Never inferred from each other. -->
+    <label class="switcher">
+      <span class="switcher-label">{{ i18n.t('shell.header.marketLabel') }}</span>
+      <select class="switcher-select" data-testid="market-switcher" (change)="onMarketChange($event)">
+        @for (market of markets; track market) {
+          <option [value]="market" [selected]="market === context.market()">
+            {{ i18n.t(marketNameKey(market)) }}
+          </option>
+        }
+      </select>
+    </label>
+    <label class="switcher">
+      <span class="switcher-label">{{ i18n.t('shell.header.languageLabel') }}</span>
+      <select class="switcher-select" data-testid="locale-switcher" (change)="onLocaleChange($event)">
+        @for (locale of locales; track locale) {
+          <option [value]="locale" [selected]="locale === context.locale()">
+            {{ i18n.t(localeNameKey(locale)) }}
+          </option>
+        }
+      </select>
+    </label>
+  </nav>
+</header>

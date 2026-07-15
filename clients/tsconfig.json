@@ -11,6 +11,10 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "isolatedModules": true,
+    /* Locale message bundles (issue 064) are statically imported JSON so SSR
+       and browser render identically with typed keys; validated as untrusted
+       input by `npm run i18n:check` before any build. */
+    "resolveJsonModule": true,
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
