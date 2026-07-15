@@ -1,0 +1,31 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CacheCow.Host/CacheCow.Host.csproj" />
+    <Project Path="src/CacheCow.SharedKernel/CacheCow.SharedKernel.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/">
+    <Project Path="src/Modules/CacheCow.Modules.BackOffice/CacheCow.Modules.BackOffice.csproj" />
+    <Project Path="src/Modules/CacheCow.Modules.CatalogInventory/CacheCow.Modules.CatalogInventory.csproj" />
+    <Project Path="src/Modules/CacheCow.Modules.ContentLocalization/CacheCow.Modules.ContentLocalization.csproj" />
+    <Project Path="src/Modules/CacheCow.Modules.Fulfillment/CacheCow.Modules.Fulfillment.csproj" />
+    <Project Path="src/Modules/CacheCow.Modules.IdentityAccess/CacheCow.Modules.IdentityAccess.csproj" />
+    <Project Path="src/Modules/CacheCow.Modules.Invoicing/CacheCow.Modules.Invoicing.csproj" />
+    <Project Path="src/Modules/CacheCow.Modules.MarketGating/CacheCow.Modules.MarketGating.csproj" />
+    <Project Path="src/Modules/CacheCow.Modules.OrderingPayments/CacheCow.Modules.OrderingPayments.csproj" />
+    <Project Path="src/Modules/CacheCow.Modules.PricingPromotions/CacheCow.Modules.PricingPromotions.csproj" />
+    <Project Path="src/Modules/CacheCow.Modules.WholesaleB2B/CacheCow.Modules.WholesaleB2B.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CacheCow.ArchitectureTests/CacheCow.ArchitectureTests.csproj" />
+    <Project Path="tests/CacheCow.Host.Tests/CacheCow.Host.Tests.csproj" />
+    <Project Path="tests/CacheCow.Modules.CatalogInventory.Tests/CacheCow.Modules.CatalogInventory.Tests.csproj" />
+    <Project Path="tests/CacheCow.Modules.Fulfillment.Tests/CacheCow.Modules.Fulfillment.Tests.csproj" />
+    <Project Path="tests/CacheCow.Modules.IdentityAccess.Tests/CacheCow.Modules.IdentityAccess.Tests.csproj" />
+    <Project Path="tests/CacheCow.Modules.Invoicing.Tests/CacheCow.Modules.Invoicing.Tests.csproj" />
+    <Project Path="tests/CacheCow.Modules.MarketGating.Tests/CacheCow.Modules.MarketGating.Tests.csproj" />
+    <Project Path="tests/CacheCow.Modules.OrderingPayments.Tests/CacheCow.Modules.OrderingPayments.Tests.csproj" />
+    <Project Path="tests/CacheCow.Modules.PricingPromotions.Tests/CacheCow.Modules.PricingPromotions.Tests.csproj" />
+    <Project Path="tests/CacheCow.Modules.WholesaleB2B.Tests/CacheCow.Modules.WholesaleB2B.Tests.csproj" />
+    <Project Path="tests/CacheCow.SharedKernel.Tests/CacheCow.SharedKernel.Tests.csproj" />
+  </Folder>
+</Solution>

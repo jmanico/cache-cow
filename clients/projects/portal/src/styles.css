@@ -1,0 +1,13 @@
+/*
+ * Global styles: brand colors/type resolve ONLY from generated design tokens
+ * (tokens/dist/tokens.css, wired via angular.json "styles").
+ * No hardcoded brand values in any client (ARCHITECTURE.md, Dependency rule 8).
+ */
+body {
+  margin: 0;
+  background: var(--cc-color-paper-100);
+  color: var(--cc-color-char-900);
+  font-family: var(--cc-font-body), sans-serif;
+  font-size: var(--cc-type-size-1);
+  line-height: var(--cc-type-line-height-body);
+}
