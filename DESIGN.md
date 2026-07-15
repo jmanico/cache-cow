@@ -1,7 +1,9 @@
 # Cache Cow: Design System (DESIGN.md)
 
-Version 1.0 | Status: Draft for review
+Version 1.1 | Status: Draft for review
 Scope: consumer storefront, regional market variants (US, ES, MX, DE, JP, IN), B2B API surface, wholesale/grocery portal, internal operations dashboard.
+
+This document owns the visual and frontend design language. Functional requirements it presents are authored in REQUIREMENTS.md (cited by CC-* ID); security constraints on the front end are authored in SECURITY.md.
 
 ---
 
@@ -19,7 +21,7 @@ Scope: consumer storefront, regional market variants (US, ES, MX, DE, JP, IN), B
 
 ## 2. Logo system
 
-Delivered assets: `cache-cow-logo.svg` (horizontal lockup), `cache-cow-icon.svg` (square app/favicon mark).
+Asset files are inventoried in section 15.
 
 ### 2.1 Construction
 
@@ -75,11 +77,11 @@ Palette is drawn from the pit: soot, bark, pink butcher paper, live coals. One g
 - Cache green on Pit: 6.7:1. Passes AA for dashboard text and badges.
 - Buttons: Paper text on Ember fill passes at button sizes; verify every new pair at implementation with automated contrast checks in CI.
 
-### 3.3 Regional color notes
+### 3.3 Veg marking
 
-- **India (FSSAI compliance).** Vegetarian products must carry the green-in-square veg symbol per FSSAI labeling rules. Since the IN catalog is 100 percent vegetarian, the veg mark appears on every PDP and on packaging renders. The brown non-veg mark must never appear in the IN locale. Use the regulation mark, not a stylized leaf, on anything that represents packaging or a menu of record.
-- **Other markets.** Vegetarian SKUs carry a simplified `cache.500` leaf-dot badge for cross-market consistency. It is a UI affordance there, not a regulatory mark.
-- Do not use red/green as the only differentiator anywhere; every status color pairs with a text label or icon shape (see accessibility, section 13).
+- **India:** the FSSAI green-in-square vegetarian symbol appears on every PDP and packaging render (CC-CNT-006 governs the marking requirement). Use the regulation mark, not a stylized leaf, on anything that represents packaging or a menu of record.
+- **Other markets:** vegetarian SKUs carry a simplified `cache.500` leaf-dot badge plus the word "Vegetarian" for cross-market consistency. It is a UI affordance there, not a regulatory mark.
+- Status is never conveyed by color alone — rule in section 13.
 
 ---
 
@@ -103,7 +105,7 @@ Alfa Slab One is Latin-only. Hierarchy must survive script switches without it.
 | ja-JP | Noto Sans JP 900 | Noto Sans JP 400/500 | Display treatment: weight 900 plus a 6px Ember slab underline bar to substitute for the slab serif's visual weight. Line-height 1.75 body. No italics. |
 | hi-IN | Noto Sans Devanagari 700 | Noto Sans Devanagari 400 | Same slab-bar display treatment. en-IN pages use the Latin stack. Taller line-height (1.7 minimum) for matra clearance. |
 
-Spanish runs roughly 20 to 25 percent longer than English and German compounds run wider still: every component must be designed at 130 percent of English string length before it is considered done.
+Spanish runs roughly 20 to 25 percent longer than English and German compounds run wider still — the empirical basis for the 130-percent expansion budget every component must meet (CC-I18N-005).
 
 ### 4.3 Scale
 
@@ -111,7 +113,7 @@ Modular scale 1.250 from a 17px base: 17 / 21 / 27 / 34 / 42 / 53 / 66. Display 
 
 ### 4.4 Numerals and prices
 
-All prices render through `Intl.NumberFormat` with the locale of record, in Plex Mono:
+Prices render locale-formatted (CC-PRC-004), in Plex Mono. Worked examples:
 
 - en-US: `$149.00`
 - es-ES: `149,00 €` (es-MX: `$149.00 MXN` where cross-currency ambiguity exists)
@@ -129,15 +131,15 @@ Smoke is always drawn as the broadcast arc fan from the logo: concentric round-c
 
 ### 5.2 Cache-status stock language
 
-Inventory state is expressed in cache vocabulary, always paired with a plain-language line so the joke never blocks comprehension:
+The three stock states (CC-CAT-003) are expressed in cache vocabulary, always paired with a plain-language line so the joke never blocks comprehension:
 
-| Badge | Plain line | Meaning |
+| Badge | Plain line | State (CC-CAT-003) |
 |---|---|---|
-| `CACHE HIT` (cache.500) | Ships today from your regional cold store | In stock in the user's geo region |
-| `WARMING` (ember.500) | Restocking, preorder available | Inbound to regional store |
-| `CACHE MISS` (smoke.400) | Not available in your region yet | No regional stock; offer nearest substitute |
+| `CACHE HIT` (cache.500) | Ships today from your regional cold store | In stock |
+| `WARMING` (ember.500) | Restocking, preorder available | Restocking |
+| `CACHE MISS` (smoke.400) | Not available in your region yet | Unavailable in region (offer nearest substitute) |
 
-In the IN locale, beef SKUs are absent from the catalog entirely. They never render as CACHE MISS; a state that implies future availability of beef in India is both wrong and offensive.
+Beef SKUs never render as CACHE MISS in the IN market — they are absent from the IN catalog entirely (CC-MKT-003), and a state that implies future availability of beef in India is both wrong and offensive.
 
 ### 5.3 Clearance naming
 
@@ -163,13 +165,13 @@ Hard rule: at most one cache/tech pun visible per viewport, and zero inside chec
 
 **Product card.** Photo (4:5), name (Archivo 700), cut/weight in Plex Mono, price in Plex Mono, cache-status badge, veg indicator where applicable. The entire card is one link; the add-to-cart button is a separate action inside it.
 
-**Region and language switcher.** Two independent controls in the header: market (drives catalog, currency, compliance) and language (drives strings). Never infer one from the other silently; geolocation proposes, the user disposes, and the choice persists. A user in Berlin may shop the DE catalog in English.
+**Region and language switcher.** Two independent controls in the header: market (drives catalog, currency, compliance) and language (drives strings). Never infer one from the other silently (selection behavior per CC-MKT-002 and CC-I18N-001).
 
-**Price display.** Always locale-formatted (4.4), always includes tax-inclusion note per market convention (DE/ES/JP inclusive, US exclusive plus estimated tax at checkout, IN inclusive with GST line at invoice).
+**Price display.** Always locale-formatted per 4.4, always includes the market's tax-inclusion note (convention per CC-PRC-002).
 
-**Order tracker.** Five stages: Smoked, Frozen, Packed, In transit, Delivered. Progress renders as arc-fan segments filling in Ember, each stage labeled in plain text with a timestamp in Plex Mono.
+**Order tracker.** Five stages: Smoked, Frozen, Packed, In transit, Delivered. Progress renders as arc-fan segments filling in Ember, each stage labeled in plain text with a timestamp in Plex Mono. (Stage mapping from the internal state machine: CC-ORD-008.)
 
-**Veg indicator.** See 3.3. In IN, the FSSAI mark. Elsewhere, the leaf-dot badge plus the word "Vegetarian".
+**Veg indicator.** Marks per 3.3.
 
 **Chef card.** Portrait, name, pit specialty, market flag(s). Chefs are shared across markets; their bios localize.
 
@@ -187,24 +189,24 @@ Hard rule: at most one cache/tech pun visible per viewport, and zero inside chec
 
 ### 8.1 The India inversion (the most important rule in this document)
 
-India is a fully vegetarian market and the cow is culturally revered. The brand handles this by inversion, not by omission:
+India is a fully vegetarian market and the cow is culturally revered (catalog and content gating per CC-MKT-003/004/005). The brand handles this by inversion, not by omission:
 
-- The IN catalog contains zero meat SKUs. Meat products, meat photography, and the Cuts page do not render in the IN market at any URL. This is a market-level content gate, enforced server-side by market, not a hidden nav link.
-- "Meet our Cows" is promoted to primary navigation in IN and framed sincerely: the herd as mascots and brand family. The same page exists in other markets under Our Story.
-- **Separation rule:** herd-mascot content and butchery content never appear in the same view in any market. The Cows page never links to meat PDPs. The Cuts page never uses mascot illustrations. This keeps the brand coherent instead of grotesque.
+- Beyond the SKU and Cuts gating those requirements enforce, meat photography does not render in the IN market on any surface — marketing bands, hero, and editorial imagery included.
+- "Meet our Cows" is promoted to primary navigation in IN and framed sincerely: the herd as mascots and brand family. In other markets the page lives under Our Story (CC-MKT-005).
+- **Separation rule:** herd-mascot content and butchery content never appear in the same view in any market (link rule: CC-CNT-002). The Cuts page never uses mascot illustrations. This keeps the brand coherent instead of grotesque.
 - IN marketing tone leans on the paneer, jackfruit, mushroom, and legume smoke program as the headline story, not as a substitute for something absent.
 
 ### 8.2 United States (en-US)
 
-Full catalog. Brisket-forward photography. Imperial units primary, metric secondary on spec sheets. Price without tax until checkout.
+Full catalog. Brisket-forward photography. Imperial units primary, metric secondary on spec sheets. Price without tax until checkout (CC-PRC-002).
 
 ### 8.3 Spanish markets (es-ES, es-MX)
 
-Both markets launch (per REQUIREMENTS.md CC-MKT-001); currency (EUR vs MXN), tax display, and some vocabulary (e.g., "carne asada" registers differently) diverge between Spain and Mexico. All Spanish strings are tagged by region variant (es-ES, es-MX). Text expansion budget applies everywhere.
+Currency and some vocabulary (e.g., "carne asada" registers differently) diverge between Spain and Mexico. All Spanish strings are tagged by region variant (es-ES, es-MX). Text expansion budget applies everywhere (4.2).
 
 ### 8.4 Germany (de-DE)
 
-Full catalog. Formal address ("Sie") throughout commerce and legal, informal permitted only in social content. Impressum, Widerrufsrecht, and detailed allergen/nutrition links are first-class footer items, not buried. German consumers expect exact net weights and unit prices (per kg) next to every price: mandatory on product cards, in Plex Mono.
+Full catalog. Formal address ("Sie") throughout commerce and legal, informal permitted only in social content. Impressum, Widerrufsbelehrung, and detailed allergen/nutrition links are first-class footer items, not buried (page requirements: CC-CNT-005). Net weights and unit prices per kg (CC-PRC-002) sit next to every price on product cards, in Plex Mono.
 
 ### 8.5 Japan (ja-JP)
 
@@ -219,7 +221,7 @@ Real smoke, real bark, char and pink smoke ring visible, shot on dark steel and 
 ## 9. Voice and microcopy
 
 - Plain verbs, sentence case, active voice. "Save changes", not "Submit".
-- The brand is funny in headlines and empty states, and completely straight in checkout, errors, legal, allergens, and anything involving money or safety (see 5.4).
+- Humor placement follows the pun budget (5.4).
 - Errors state what happened and what to do next. No apologies, no mascots in error states.
 - Empty cart: "Your cache is empty. Warm it up." with a menu CTA. That is the entire permitted joke in the cart.
 - Translated copy is written per market by native speakers, not translated puns. A cache pun that needs a footnote in Japanese is cut in Japanese.
@@ -236,9 +238,9 @@ Real smoke, real bark, char and pink smoke ring visible, shot on dark steel and 
 | Checkout | Straight voice, locale tax/units, delivery windows (JP), address formats per market |
 | Store locator | Grocery partners carrying frozen retail SKUs |
 | Meet our Chefs | Shared roster, localized bios |
-| Meet our Cows | Mascot herd (8.1); primary nav in IN |
-| Meet our Cuts | Interactive butcher diagram; not rendered in IN |
-| Contact, FAQ, shipping policy, legal | Standard; DE legal requirements per 8.4 |
+| Meet our Cows | Mascot herd (8.1); nav placement per CC-MKT-005 |
+| Meet our Cuts | Interactive butcher diagram (CC-CNT-003; market gating per CC-MKT-005) |
+| Contact, FAQ, shipping policy, legal | Standard; DE per 8.4 |
 
 ## 11. B2B and API surface
 
@@ -250,34 +252,25 @@ Real smoke, real bark, char and pink smoke ring visible, shot on dark steel and 
 - **Theme:** Pit background, Pitpaper text, cache-green for good states, Ember for alerts, Smoke for neutral. One accent family per meaning; charts never use decorative palettes.
 - **Type:** Archivo for UI, Plex Mono for every number. Table numerals right-aligned, units in column headers not cells.
 - **Density:** compact by default (staff tools optimize for scan speed), 40px rows, sticky headers, keyboard-first filtering.
-- **Modules:** sales overview (by market region, mapped to the same region model as consumer pricing), orders, invoices (print stylesheet in the consumer light theme so paper invoices are Paper, not Pit), inventory by regional cold store (the literal cache view: hit rates per SKU per region is a real, useful metric and the one dashboard moment where the brand metaphor and the operational truth are the same thing), employee management (role-based views; see 14).
+- **Modules** (inventory per CC-DSH-003): sales overview regions map to the same region model as consumer pricing; invoices get a print stylesheet in the consumer light theme so paper invoices are Paper, not Pit; inventory by regional cold store is the literal cache view — the per-SKU per-region hit rate (CC-DSH-006) is the one dashboard moment where the brand metaphor and the operational truth are the same thing.
 - Charts: bar and line only by default, Char/Ember/Cache/Smoke series colors, direct labeling over legends where series count is 3 or fewer.
 
 ## 13. Accessibility
 
-- WCAG 2.2 AA floor across all surfaces, including the dashboard.
+- WCAG 2.2 AA floor across all surfaces, including the dashboard (test cadence: CC-NFR-004).
 - Verified contrast pairs per 3.2; CI contrast checks on token combinations.
 - Status is never color-only: every badge carries text (5.2), the veg mark is a shape plus label.
 - Full keyboard operability, visible focus (2px Ember outline on light, Cache on Pit), logical tab order through the butcher-diagram interactive with a list fallback.
 - `prefers-reduced-motion` disables the arc-fill animation and all reveals; content renders in final state.
-- Language and direction set correctly per locale (`lang`, and the architecture must not assume LTR forever; Devanagari is LTR but future markets may not be).
+- Language and direction set correctly per locale (CC-I18N-004; RTL non-preclusion per REQUIREMENTS.md §16 — Devanagari is LTR, but future markets may not be).
 - Icons and the interactive cuts diagram carry ARIA labels; the diagram exposes each region as a named button.
 
-## 14. Secure-by-design front-end defaults
+## 14. Front-end security
 
-Design decisions with direct security consequences, stated here so they survive into implementation:
+All front-end security constraints (sinks, CSP-compatible construction, translation-string handling, URL validation, schema-validated boundary data, dashboard isolation) are authored in SECURITY.md.
 
-- No raw-HTML injection sinks anywhere (`bypassSecurityTrust*`, unsanitized `[innerHTML]`), including CMS-driven marketing bands. Rich content renders through a strict allowlist renderer.
-- Translation strings are data, not markup: ICU MessageFormat with interpolated values escaped by default. Localization files are an injection surface (five languages means five supply chains for strings); no HTML in string files.
-- All `href`/`src` values pass URL validation with a `#` fallback; partner-store links in the locator are validated against a registered-domain allowlist.
-- CSP-friendly by construction: no inline handlers, no inline styles required by any component in this document.
-- All API and form boundary data validated with schemas (Zod) before rendering; price and inventory values render only from typed, validated responses.
-- The dashboard is a separate origin from the storefront, with role-based views designed in (employee management screens expose only what the role requires).
+## 15. Assets
 
-## 15. Delivered and planned assets
+Logo assets: `cache-cow-logo.svg` (horizontal lockup, outlined type, no font dependencies), `cache-cow-icon.svg` (square app/favicon mark, 240 tile). Remaining set: single-color icon variants (Char, Paper), favicon/ICO set, social avatar exports, the cow-mascot illustration set (7), the butcher-diagram base art, packaging dieline mock, and a tokens file (`tokens.json`) generated from sections 3 and 4 for design-tool and code consumption.
 
-Delivered now: `cache-cow-logo.svg` (lockup, outlined type, no font dependencies), `cache-cow-icon.svg` (240 tile).
-
-To produce next: single-color icon variants (Char, Paper), favicon/ICO set, social avatar exports, the cow-mascot illustration set (7.x), the butcher-diagram base art, packaging dieline mock, and a tokens file (`tokens.json`) generated from section 3 and 4 for design-tool and code consumption.
-
-Fonts: Alfa Slab One (OFL), Archivo (OFL), IBM Plex Mono (OFL), Noto Sans JP (OFL), Noto Sans Devanagari (OFL). All open-license, self-hostable, subset per locale for performance; no third-party font CDN at runtime.
+Fonts: Alfa Slab One (OFL), Archivo (OFL), IBM Plex Mono (OFL), Noto Sans JP (OFL), Noto Sans Devanagari (OFL) — all open-license (hosting and subsetting rules: CC-NFR-005).
