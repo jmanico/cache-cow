@@ -10,8 +10,13 @@ namespace CacheCow.Host.Security;
 /// nonexistent path answers 404 instead - the derived hardening default for
 /// inaccessible resources of SECURITY.md, Authentication rule 9 (and the
 /// status semantics CC-MKT-004 hard-requires for gated IN resources later).
-/// Requests that DID match an endpoint keep the framework's denial behavior
-/// (401 challenge / 403 forbid), so real endpoints stay deny-by-default.
+/// Additionally (issue 062, CC-SEC-007): endpoints marked with
+/// <see cref="ResourceEndpointAttribute"/> map an authenticated caller's
+/// authorization *forbid* (wrong tenant, wrong role) to the same 404, so a
+/// role- or tenancy-denied resource is indistinguishable from a nonexistent
+/// one. Unauthenticated requests to matched endpoints keep the 401 challenge,
+/// and unmarked endpoints keep the framework's 403, so real endpoints stay
+/// deny-by-default.
 /// </summary>
 public sealed class NotFoundForUnmatchedRoutesAuthorizationResultHandler : IAuthorizationMiddlewareResultHandler
 {
@@ -26,10 +31,15 @@ public sealed class NotFoundForUnmatchedRoutesAuthorizationResultHandler : IAuth
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(authorizeResult);
 
-        if (!authorizeResult.Succeeded && context.GetEndpoint() is null)
+        if (!authorizeResult.Succeeded)
         {
-            context.Response.StatusCode = StatusCodes.Status404NotFound;
-            return Task.CompletedTask;
+            var endpoint = context.GetEndpoint();
+            if (endpoint is null
+                || (authorizeResult.Forbidden && endpoint.Metadata.GetMetadata<ResourceEndpointAttribute>() is not null))
+            {
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                return Task.CompletedTask;
+            }
         }
 
         return _default.HandleAsync(next, context, policy, authorizeResult);

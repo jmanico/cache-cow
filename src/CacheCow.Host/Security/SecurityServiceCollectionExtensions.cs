@@ -1,5 +1,7 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Cors.Infrastructure;
@@ -59,6 +61,23 @@ public static class SecurityServiceCollectionExtensions
             .AddScheme<AuthenticationSchemeOptions, UnconfiguredAuthenticationHandler>(
                 CacheCowAuthentication.PlaceholderScheme, null);
 
+        // Issue 061 (CC-SEC-006): session cookie policy applied to every
+        // cookie scheme, per-request revocation validation, session-id
+        // lifecycle for sign-in/privilege-change refresh, host-wide cookie
+        // policy backstop, and global antiforgery enforcement.
+        services.AddSingleton<ISessionRevocation, InMemorySessionRevocation>();
+        services.AddSingleton<ISessionLifecycle, SessionLifecycle>();
+        services.AddTransient<RevocationValidatingCookieEvents>();
+        services.AddSingleton<IConfigureOptions<CookieAuthenticationOptions>, SessionCookieAuthenticationConfigurator>();
+        services.AddSingleton<IConfigureOptions<CookiePolicyOptions>, CookiePolicyOptionsConfigurator>();
+        services.AddAntiforgery();
+        services.AddSingleton<IConfigureOptions<AntiforgeryOptions>, AntiforgeryOptionsConfigurator>();
+
+        // Issue 062 (CC-SEC-007): object-level authorization - every
+        // caller-owned resource access proves owner-or-tenant match
+        // server-side via the named owner policy.
+        services.AddSingleton<IAuthorizationHandler, ResourceOwnershipHandler>();
+
         // Issue 020: deny by default - every endpoint requires an
         // authenticated user unless it explicitly opts out; access is granted
         // via named policies (SECURITY.md, Authentication rule 1).
@@ -69,6 +88,11 @@ public static class SecurityServiceCollectionExtensions
                 .Build();
             options.FallbackPolicy = requireAuthenticated;
             options.DefaultPolicy = requireAuthenticated;
+
+            // Issue 062 (CC-SEC-007; SECURITY.md, Authentication rule 9).
+            options.AddPolicy(ResourceAuthorization.OwnerPolicy, policy => policy
+                .RequireAuthenticatedUser()
+                .AddRequirements(ResourceOwnershipRequirement.Instance));
         });
 
         // Unmatched routes answer 404 rather than a 401 challenge
