@@ -1,0 +1,151 @@
+{
+  "$description": "Single source for generated Cache Cow design tokens (issue 005). Values are transcribed from DESIGN.md: section 3.1 core color tokens, section 3.2 verified contrast pairs, section 4 typography, section 5.2 cache-status vocabulary. DESIGN.md owns these values (CLAUDE.md: rules live in the owning canonical document) — change DESIGN.md first, then mirror here. Clients consume only the generated artifacts in tokens/dist/ (ARCHITECTURE.md, Dependency rule 8).",
+  "color": {
+    "char": {
+      "900": { "value": "#221812", "role": "Primary text, logo, footer background" }
+    },
+    "bark": {
+      "700": { "value": "#4A3226", "role": "Secondary text, icons" }
+    },
+    "smoke": {
+      "400": { "value": "#A79A8F", "role": "Borders, dividers, disabled states" }
+    },
+    "butcher": {
+      "300": { "value": "#F0C39B", "role": "Brand surface: hero bands, cards, icon tile" }
+    },
+    "paper": {
+      "100": { "value": "#FCF7F0", "role": "Default page background, long-form reading" }
+    },
+    "ember": {
+      "500": { "value": "#E04E1B", "role": "Primary action, price highlights, sale, the smoke arcs" },
+      "700": { "value": "#B23A12", "role": "Action hover/pressed, ember text on light surfaces when 4.5:1 is required" }
+    },
+    "cache": {
+      "500": { "value": "#1FA860", "role": "In-stock status, veg indicator, success" }
+    },
+    "pit": {
+      "950": { "value": "#16110E", "role": "Dashboard and API docs background" }
+    },
+    "pitpaper": {
+      "100": { "value": "#E9DED4", "role": "Dashboard primary text" }
+    }
+  },
+  "typography": {
+    "roles": {
+      "display": {
+        "family": "Alfa Slab One",
+        "usage": "H1, hero, section titles, big prices on promo; one display moment per viewport (DESIGN.md 4.1)"
+      },
+      "body": {
+        "family": "Archivo",
+        "usage": "UI and body: body 400 at 17px/1.6, UI labels 500, subheads 700 (DESIGN.md 4.1)"
+      },
+      "data": {
+        "family": "IBM Plex Mono",
+        "usage": "Prices, SKUs, order and invoice numbers, weights, dates in tables, API docs, cache-status badges (DESIGN.md 4.1)"
+      }
+    },
+    "scripts": {
+      "latin": {
+        "locales": ["en-US", "es-ES", "es-MX", "de-DE", "en-IN"],
+        "display": { "family": "Alfa Slab One" },
+        "body": { "family": "Archivo" },
+        "notes": "de-DE: hyphens auto with correct lang attr; avoid all-caps nav labels in German (DESIGN.md 4.2)"
+      },
+      "ja-JP": {
+        "locales": ["ja-JP"],
+        "display": { "family": "Noto Sans JP", "weight": 900 },
+        "body": { "family": "Noto Sans JP", "lineHeight": 1.75 },
+        "notes": "Display: weight 900 plus 6px Ember slab underline bar; no italics (DESIGN.md 4.2)"
+      },
+      "hi-IN": {
+        "locales": ["hi-IN"],
+        "display": { "family": "Noto Sans Devanagari", "weight": 700 },
+        "body": { "family": "Noto Sans Devanagari", "lineHeight": 1.7 },
+        "notes": "Same slab-bar display treatment; line-height 1.7 minimum for matra clearance (DESIGN.md 4.2)"
+      }
+    },
+    "scale": {
+      "basePx": 17,
+      "ratio": 1.25,
+      "stepsPx": [17, 21, 27, 34, 42, 53, 66],
+      "displayH1MaxPx": { "desktop": 66, "mobile": 42 },
+      "notes": "Modular scale 1.250 from 17px base; Plex Mono data sits one step below its surrounding Archivo text (DESIGN.md 4.3)"
+    },
+    "lineHeights": { "body": 1.6 },
+    "weights": { "body": 400, "uiLabel": 500, "subhead": 700 }
+  },
+  "status": {
+    "cacheHit": {
+      "badge": "CACHE HIT",
+      "plainLine": "Ships today from your regional cold store",
+      "colorToken": "color.cache.500",
+      "state": "in-stock",
+      "notes": "Badge is always paired with the plain-language line: status is never conveyed by color alone (DESIGN.md 5.2, 13; CC-CAT-003)"
+    },
+    "warming": {
+      "badge": "WARMING",
+      "plainLine": "Restocking, preorder available",
+      "colorToken": "color.ember.500",
+      "state": "restocking",
+      "notes": "Badge is always paired with the plain-language line (DESIGN.md 5.2, 13; CC-CAT-003)"
+    },
+    "cacheMiss": {
+      "badge": "CACHE MISS",
+      "plainLine": "Not available in your region yet",
+      "colorToken": "color.smoke.400",
+      "state": "unavailable-in-region",
+      "notes": "Badge is always paired with the plain-language line (DESIGN.md 5.2, 13; CC-CAT-003)"
+    }
+  },
+  "contrastPairs": [
+    {
+      "name": "char.900 on paper.100",
+      "fg": "color.char.900",
+      "bg": "color.paper.100",
+      "minRatio": 7.0,
+      "documentedRatio": 15.8,
+      "usage": "All text; DESIGN.md 3.2 states this passes AA and AAA for all text, so the enforced floor is WCAG AAA normal text (7:1)"
+    },
+    {
+      "name": "char.900 on butcher.300",
+      "fg": "color.char.900",
+      "bg": "color.butcher.300",
+      "minRatio": 7.0,
+      "documentedRatio": 10.4,
+      "usage": "All text; DESIGN.md 3.2 states this passes AA and AAA for all text, so the enforced floor is WCAG AAA normal text (7:1)"
+    },
+    {
+      "name": "ember.500 on paper.100",
+      "fg": "color.ember.500",
+      "bg": "color.paper.100",
+      "minRatio": 3.0,
+      "documentedRatio": 3.7,
+      "usage": "Large text and graphics ONLY (WCAG AA large 3:1); body text is never ember.500 on Paper — use ember.700 (DESIGN.md 3.2)"
+    },
+    {
+      "name": "ember.700 on paper.100",
+      "fg": "color.ember.700",
+      "bg": "color.paper.100",
+      "minRatio": 4.5,
+      "documentedRatio": 5.9,
+      "usage": "Colored body-size text on light surfaces when 4.5:1 is required (WCAG AA normal text; DESIGN.md 3.2)"
+    },
+    {
+      "name": "cache.500 on pit.950",
+      "fg": "color.cache.500",
+      "bg": "color.pit.950",
+      "minRatio": 4.5,
+      "documentedRatio": 6.7,
+      "usage": "Dashboard text and badges (WCAG AA normal text; DESIGN.md 3.2)"
+    },
+    {
+      "name": "paper.100 on ember.500",
+      "fg": "color.paper.100",
+      "bg": "color.ember.500",
+      "minRatio": 3.0,
+      "documentedRatio": null,
+      "usage": "Button label text on Ember fill; DESIGN.md 3.2 states it passes at button sizes (WCAG AA large 3:1)"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+<!--
+  Minimal bootstrap shell only (issue 004): no feature pages here.
+  Internal dashboard — deploys to a separate origin with distinct session scope;
+  never shares modules/cookies/tokens with storefront or portal
+  (SECURITY.md, HTTP boundary rule 8; ARCHITECTURE.md, Dependency rule 4).
+  Pit-themed (DESIGN.md section 12). CSP-compatible by construction:
+  no inline event handlers, no inline styles (SECURITY.md, HTTP boundary rule 2).
+-->
+<main class="shell">
+  <h1>Cache Cow — {{ title() }}</h1>
+  <p class="shell-note">Internal operations dashboard shell.</p>
+</main>
+<router-outlet />
