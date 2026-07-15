@@ -1,0 +1,77 @@
+/*
+ * Header styling. All brand values from generated tokens (Dependency rule 8).
+ * Layout resilience (issue 065, CC-I18N-005): flexible rows that wrap, no
+ * fixed-width labels, no truncation, no all-caps labels (DESIGN.md 4.2) —
+ * labels survive 130% expansion by wrapping instead of clipping.
+ */
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 16px 24px;
+  background: var(--cc-color-paper-100);
+}
+
+.logo-link {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.logo {
+  display: block;
+  /* Lockup minimum 140px; at >= 200px the with-tag variant is correct (DESIGN.md 2.2/2.3). */
+  width: 217px;
+  max-width: 100%;
+  height: auto;
+}
+
+.switchers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  /* Flex children may shrink below content width only by wrapping, never by clipping. */
+  min-width: 0;
+}
+
+.switcher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.switcher-label {
+  font-weight: var(--cc-weight-ui-label);
+  color: var(--cc-color-bark-700);
+  /* No fixed width, no nowrap: the label wraps at 130% expansion. */
+  overflow-wrap: break-word;
+}
+
+.switcher-select {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--cc-color-char-900);
+  background: var(--cc-color-paper-100);
+  border: 1px solid var(--cc-color-smoke-400);
+  border-radius: 4px;
+  padding: 4px 8px;
+  max-width: 100%;
+}
+
+/* Visible focus: 2px Ember outline on light surfaces (DESIGN.md 13). */
+.switcher-select:focus-visible,
+.logo-link:focus-visible {
+  outline: 2px solid var(--cc-color-ember-500);
+  outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+  .site-header {
+    padding: 12px 16px;
+  }
+}

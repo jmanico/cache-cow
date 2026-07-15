@@ -53,6 +53,19 @@ public sealed class SecurityOptionsValidator : IValidateOptions<SecurityOptions>
         ValidateRatePolicy(failures, options.RateLimiting.Authentication, "Security:RateLimiting:Authentication");
         ValidateRatePolicy(failures, options.RateLimiting.OrderCreation, "Security:RateLimiting:OrderCreation");
 
+        var sameSite = options.SessionCookies.SameSite;
+        if (!string.Equals(sameSite, "Strict", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(sameSite, "Lax", StringComparison.OrdinalIgnoreCase))
+        {
+            failures.Add(
+                "Security:SessionCookies:SameSite must be 'Strict' or 'Lax'; 'None' would drop the SameSite CSRF layer (SECURITY.md, Authentication rule 11; CC-SEC-006).");
+        }
+
+        if (options.SessionCookies.MaxAgeHours < 1)
+        {
+            failures.Add("Security:SessionCookies:MaxAgeHours must be at least 1 hour - session expiry must be bounded (CC-SEC-006).");
+        }
+
         return failures.Count == 0
             ? ValidateOptionsResult.Success
             : ValidateOptionsResult.Fail(failures);

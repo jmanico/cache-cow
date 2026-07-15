@@ -20,6 +20,32 @@ public sealed class SecurityOptions
     public RequestLimitSettings RequestLimits { get; init; } = new();
 
     public RateLimitingSettings RateLimiting { get; init; } = new();
+
+    public SessionCookieSettings SessionCookies { get; init; } = new();
+}
+
+/// <summary>
+/// Session cookie policy (CC-SEC-006; SECURITY.md, Authentication rule 11):
+/// HttpOnly and Secure are unconditional; SameSite mode and the bounded expiry
+/// come from here. Two open decisions per issue 061 (not resolved here):
+/// SECURITY.md mandates SameSite without fixing Lax vs. Strict - Strict is the
+/// stricter default pending a human decision, and it interacts with
+/// payment-processor redirect returns (Stripe/Razorpay, CC-ORD-004); and only
+/// the dashboard session lifetime is ratified (12 hours, CC-DSH-001) -
+/// consumer storefront and wholesale-portal lifetimes are undecided, so 12
+/// hours is the conservative placeholder for all surfaces.
+/// </summary>
+public sealed class SessionCookieSettings
+{
+    /// <summary>"Strict" or "Lax"; "None" is rejected at startup.</summary>
+    public string SameSite { get; set; } = "Strict";
+
+    /// <summary>Absolute session bound in hours (cookie Max-Age and ticket lifetime).</summary>
+    public int MaxAgeHours { get; set; } = 12;
+
+    /// <summary>Fail-closed parse: anything but an explicit "Lax" is Strict.</summary>
+    public SameSiteMode ParsedSameSite =>
+        string.Equals(SameSite, "Lax", StringComparison.OrdinalIgnoreCase) ? SameSiteMode.Lax : SameSiteMode.Strict;
 }
 
 /// <summary>

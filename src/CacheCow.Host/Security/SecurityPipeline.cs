@@ -23,12 +23,14 @@ public static class SecurityPipeline
         "SecurityHeaders",
         "ValidationRejectionLogging",
         "RequestBodySizeLimit",
+        "CookiePolicy",
         "StaticFiles",
         "Routing",
         "Cors",
         "Authentication",
         "RateLimiter",
         "Authorization",
+        "AntiforgeryValidation",
     ];
 
     public static WebApplication UseCacheCowSecurityPipeline(this WebApplication app)
@@ -65,6 +67,11 @@ public static class SecurityPipeline
         app.UseMiddleware<ValidationRejectionLoggingMiddleware>();
         app.UseMiddleware<RequestBodySizeLimitMiddleware>();
 
+        // CookiePolicy: no response cookie leaves the host without
+        // HttpOnly/Secure/SameSite, wherever it is appended downstream
+        // (CC-SEC-006; issue 061 AC-01 backstop).
+        app.UseCookiePolicy();
+
         app.UseStaticFiles();
 
         app.UseRouting();
@@ -80,6 +87,12 @@ public static class SecurityPipeline
         app.UseAuthentication();
         app.UseRateLimiter();
         app.UseAuthorization();
+
+        // AntiforgeryValidation after authorization (401/403/404 semantics
+        // take precedence) and before the endpoint, so a cookie-authenticated
+        // state-changing request without a valid token is rejected before any
+        // state change executes (CC-SEC-006; issue 061 AC-04/AC-05).
+        app.UseMiddleware<AntiforgeryValidationMiddleware>();
 
         return app;
     }

@@ -13,3 +13,40 @@ body {
   font-size: var(--cc-type-size-1);
   line-height: var(--cc-type-line-height-body);
 }
+
+/*
+ * Locale layout resilience (issue 065; CC-I18N-005; DESIGN.md 4.2).
+ * These rules key off the document `lang` attribute, which HeadI18n sets to
+ * the server-resolved rendered locale (CC-I18N-004) — so per-script behavior
+ * follows the transacting locale, never a client hint.
+ */
+
+/* de-DE: German compounds break layouts without hyphenation; requires the
+ * correct lang attr. Nav labels are never all-caps (no text-transform:
+ * uppercase exists in this codebase for labels). */
+:lang(de) {
+  hyphens: auto;
+}
+
+/* ja-JP: Noto Sans JP, body line-height 1.75, no italics. */
+:lang(ja) {
+  font-family: var(--cc-font-body-ja-jp), sans-serif;
+  line-height: var(--cc-type-line-height-body-ja-jp);
+}
+:lang(ja) em,
+:lang(ja) i {
+  font-style: normal;
+}
+
+/* hi-IN: Noto Sans Devanagari, line-height >= 1.7 for matra clearance.
+ * en-IN keeps the Latin stack (matched only by :lang(hi), not en-IN). */
+:lang(hi) {
+  font-family: var(--cc-font-body-hi-in), sans-serif;
+  line-height: var(--cc-type-line-height-body-hi-in);
+}
+
+/* Visible focus for keyboard operation (DESIGN.md 13): 2px Ember on light. */
+:focus-visible {
+  outline: 2px solid var(--cc-color-ember-500);
+  outline-offset: 2px;
+}

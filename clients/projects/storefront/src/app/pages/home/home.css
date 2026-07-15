@@ -1,0 +1,38 @@
+/* Butcher hero band on Paper page (DESIGN.md 6). Tokens only (rule 8). */
+.hero {
+  background: var(--cc-color-butcher-300);
+}
+
+.hero-inner {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 64px 24px;
+}
+
+.hero-title {
+  margin: 0;
+  font-family: var(--cc-font-display), serif;
+  font-weight: var(--cc-weight-body);
+  font-size: var(--cc-type-size-7);
+  line-height: 1.15;
+  color: var(--cc-color-char-900);
+  overflow-wrap: break-word; /* survives 130% expansion (CC-I18N-005) */
+}
+
+.hero-lede {
+  margin: 16px 0 0;
+  max-width: 60ch;
+  font-size: var(--cc-type-size-2);
+  color: var(--cc-color-bark-700);
+  overflow-wrap: break-word;
+}
+
+/* Display H1 caps at 42px on mobile (DESIGN.md 4.3). */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: var(--cc-type-size-5);
+  }
+  .hero-inner {
+    padding: 48px 16px;
+  }
+}

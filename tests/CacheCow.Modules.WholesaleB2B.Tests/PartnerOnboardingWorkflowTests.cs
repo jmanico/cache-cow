@@ -1,4 +1,5 @@
 using System.Reflection;
+using CacheCow.Modules.WholesaleB2B.Auth;
 using CacheCow.Modules.WholesaleB2B.Partners;
 using CacheCow.SharedKernel.Testing;
 using Xunit;
@@ -162,8 +163,16 @@ public sealed class PartnerOnboardingWorkflowTests
             var requiresDashboardActor =
                 member.GetParameters().Any(p => p.ParameterType == typeof(DashboardActorProof));
 
+            // Issue 054: the client directory is a host-adapted READ port
+            // returning persisted tenancy state — it cannot construct or
+            // transition a tenant (no public constructor, no state setter,
+            // WithState is internal), so it opens no activation path.
+            var isPersistedStateLookup =
+                member.DeclaringType == typeof(IB2BClientDirectory)
+                && member.Name == nameof(IB2BClientDirectory.FindByClientId);
+
             Assert.True(
-                isDraftOnlyFactory || requiresDashboardActor,
+                isDraftOnlyFactory || requiresDashboardActor || isPersistedStateLookup,
                 $"{member.DeclaringType!.Name}.{member.Name} yields a PartnerTenant without a DashboardActorProof (issue 049, AC-04).");
         }
 

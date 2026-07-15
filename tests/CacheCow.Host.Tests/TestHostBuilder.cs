@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using CacheCow.Host.Security;
 using CacheCow.Host.TestSupport;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -27,7 +28,8 @@ internal static class TestHostBuilder
     public static WebApplicationFactory<Program> Create(
         IDictionary<string, string?>? config = null,
         string? environment = null,
-        string? staticRoot = null)
+        string? staticRoot = null,
+        Action<IServiceCollection>? configureServices = null)
     {
         return new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
@@ -60,11 +62,16 @@ internal static class TestHostBuilder
                 services.AddSingleton<TestOnlyEndpoints.OrderCounter>();
 
                 services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = TestAuthHandler.Scheme;
-                    options.DefaultChallengeScheme = TestAuthHandler.Scheme;
-                    options.DefaultForbidScheme = TestAuthHandler.Scheme;
-                }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.Scheme, null);
+                    {
+                        options.DefaultAuthenticateScheme = TestAuthHandler.Scheme;
+                        options.DefaultChallengeScheme = TestAuthHandler.Scheme;
+                        options.DefaultForbidScheme = TestAuthHandler.Scheme;
+                    })
+                    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.Scheme, null)
+                    // Cookie scheme for the issue 061 probes; its options are
+                    // configured by the product SessionCookieAuthenticationConfigurator,
+                    // which is exactly what the cookie-attribute assertions verify.
+                    .AddCookie(TestOnlyEndpoints.TestCookieScheme);
 
                 services.AddAuthorization(options =>
                     options.AddPolicy("test-throwing", policy => policy.AddRequirements(new ThrowingRequirement())));
@@ -80,6 +87,8 @@ internal static class TestHostBuilder
                     services.Configure<StaticFileOptions>(options =>
                         options.FileProvider = new PhysicalFileProvider(staticRoot));
                 }
+
+                configureServices?.Invoke(services);
             });
         });
     }
@@ -100,11 +109,18 @@ internal static class TestHostBuilder
         });
 }
 
-/// <summary>Authenticates when the X-Test-User header is present; otherwise no result.</summary>
+/// <summary>
+/// Authenticates when the X-Test-User header is present; otherwise no result.
+/// Optional X-Test-Tenant and X-Test-Roles (comma-separated) headers supply
+/// the tenant claim and roles the object-level authorization suite scopes by
+/// (issue 062).
+/// </summary>
 internal sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    public new const string Scheme = "Test";
+    public new const string Scheme = TestOnlyEndpoints.TestHeaderScheme;
     public const string UserHeader = "X-Test-User";
+    public const string TenantHeader = "X-Test-Tenant";
+    public const string RolesHeader = "X-Test-Roles";
 
     public TestAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -121,7 +137,26 @@ internal sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSche
             return Task.FromResult(AuthenticateResult.NoResult());
         }
 
-        var identity = new ClaimsIdentity([new Claim(ClaimTypes.Name, user.ToString())], Scheme);
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.Name, user.ToString()),
+            new(ClaimTypes.NameIdentifier, user.ToString()),
+        };
+
+        if (Request.Headers.TryGetValue(TenantHeader, out var tenant) && !StringValues.IsNullOrEmpty(tenant))
+        {
+            claims.Add(new Claim(CacheCowClaims.TenantId, tenant.ToString()));
+        }
+
+        if (Request.Headers.TryGetValue(RolesHeader, out var roles) && !StringValues.IsNullOrEmpty(roles))
+        {
+            foreach (var role in roles.ToString().Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+        }
+
+        var identity = new ClaimsIdentity(claims, Scheme);
         var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), Scheme);
         return Task.FromResult(AuthenticateResult.Success(ticket));
     }

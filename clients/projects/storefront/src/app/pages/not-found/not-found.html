@@ -1,0 +1,12 @@
+<section class="not-found">
+  <!-- Broadcast arc fan (DESIGN.md 5.1): concentric round-capped Ember arcs.
+       Static inline SVG markup (not [innerHTML]); colors via CSS tokens. -->
+  <svg class="arcs" viewBox="0 0 100 64" width="120" height="77" aria-hidden="true" focusable="false">
+    <path class="arc" d="M38 58 A12 12 0 0 1 62 58" />
+    <path class="arc" d="M28 58 A22 22 0 0 1 72 58" />
+    <path class="arc" d="M18 58 A32 32 0 0 1 82 58" />
+  </svg>
+  <h1 class="not-found-title">{{ i18n.t('notFound.title') }}</h1>
+  <p class="not-found-body">{{ i18n.t('notFound.body') }}</p>
+  <a class="not-found-home" routerLink="/">{{ i18n.t('notFound.homeCta') }}</a>
+</section>

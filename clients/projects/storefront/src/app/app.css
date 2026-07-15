@@ -1,0 +1,11 @@
+/* Root shell layout: sticky-footer column; Paper page background comes from
+ * the global body rule (tokens only, Dependency rule 8). */
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.page-main {
+  flex: 1 0 auto;
+}
