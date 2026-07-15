@@ -19,9 +19,13 @@
     <Project Path="tests/CacheCow.ArchitectureTests/CacheCow.ArchitectureTests.csproj" />
     <Project Path="tests/CacheCow.Host.Tests/CacheCow.Host.Tests.csproj" />
     <Project Path="tests/CacheCow.Modules.CatalogInventory.Tests/CacheCow.Modules.CatalogInventory.Tests.csproj" />
+    <Project Path="tests/CacheCow.Modules.Fulfillment.Tests/CacheCow.Modules.Fulfillment.Tests.csproj" />
+    <Project Path="tests/CacheCow.Modules.IdentityAccess.Tests/CacheCow.Modules.IdentityAccess.Tests.csproj" />
+    <Project Path="tests/CacheCow.Modules.Invoicing.Tests/CacheCow.Modules.Invoicing.Tests.csproj" />
     <Project Path="tests/CacheCow.Modules.MarketGating.Tests/CacheCow.Modules.MarketGating.Tests.csproj" />
     <Project Path="tests/CacheCow.Modules.OrderingPayments.Tests/CacheCow.Modules.OrderingPayments.Tests.csproj" />
     <Project Path="tests/CacheCow.Modules.PricingPromotions.Tests/CacheCow.Modules.PricingPromotions.Tests.csproj" />
+    <Project Path="tests/CacheCow.Modules.WholesaleB2B.Tests/CacheCow.Modules.WholesaleB2B.Tests.csproj" />
     <Project Path="tests/CacheCow.SharedKernel.Tests/CacheCow.SharedKernel.Tests.csproj" />
   </Folder>
 </Solution>
