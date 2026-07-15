@@ -18,7 +18,9 @@
   <Folder Name="/tests/">
     <Project Path="tests/CacheCow.ArchitectureTests/CacheCow.ArchitectureTests.csproj" />
     <Project Path="tests/CacheCow.Host.Tests/CacheCow.Host.Tests.csproj" />
+    <Project Path="tests/CacheCow.Modules.BackOffice.Tests/CacheCow.Modules.BackOffice.Tests.csproj" />
     <Project Path="tests/CacheCow.Modules.CatalogInventory.Tests/CacheCow.Modules.CatalogInventory.Tests.csproj" />
+    <Project Path="tests/CacheCow.Modules.ContentLocalization.Tests/CacheCow.Modules.ContentLocalization.Tests.csproj" />
     <Project Path="tests/CacheCow.Modules.Fulfillment.Tests/CacheCow.Modules.Fulfillment.Tests.csproj" />
     <Project Path="tests/CacheCow.Modules.IdentityAccess.Tests/CacheCow.Modules.IdentityAccess.Tests.csproj" />
     <Project Path="tests/CacheCow.Modules.Invoicing.Tests/CacheCow.Modules.Invoicing.Tests.csproj" />
