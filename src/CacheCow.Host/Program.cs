@@ -1,3 +1,5 @@
+using CacheCow.Host.Security;
+using CacheCow.Host.TestSupport;
 using CacheCow.Modules.BackOffice;
 using CacheCow.Modules.CatalogInventory;
 using CacheCow.Modules.ContentLocalization;
@@ -23,15 +25,40 @@ builder.Services
     .AddIdentityAccessModule()
     .AddContentLocalizationModule();
 
+// Issues 016-022: transport, headers, CORS/limits, rate limiting,
+// deny-by-default authorization, RFC 9457 errors, security-event logging.
+builder.Services.AddCacheCowSecurity();
+
+// Kestrel transport-level body cap (SECURITY.md, HTTP boundary rule 7); the
+// in-pipeline RequestBodySizeLimitMiddleware applies the same configured cap
+// per request. API-host plaintext rejection (SECURITY.md, HTTP boundary
+// rule 1: no HTTP listener at all, never a redirect) is Kestrel endpoint /
+// ingress *configuration*, not middleware: the deployment binds only TLS
+// endpoints for API hosts (issue 016 AC-02/AC-06; the TLS termination
+// topology is an engineering decision flagged in issue 016's open questions).
+// It is not exercisable in-process because the test server bypasses listener
+// binding; the in-process suite covers redirect + HSTS + ordering instead.
+builder.WebHost.ConfigureKestrel((context, kestrel) =>
+{
+    var limits = context.Configuration
+        .GetSection(SecurityOptions.SectionName)
+        .Get<SecurityOptions>()?.RequestLimits ?? new RequestLimitSettings();
+    kestrel.Limits.MaxRequestBodySize = limits.MaxRequestBodyBytes;
+});
+
 var app = builder.Build();
 
-// Pipeline intentionally empty: middleware (TLS/HSTS, CSP, authn/authz order —
-// SECURITY.md, HTTP boundary rule 5) lands in issues 016–022; endpoints land in
-// their bounded contexts' issues. The scaffold proves one-deployable packaging
-// only (issue 001, AC-01/AC-06).
+// Middleware in the order fixed by SECURITY.md HTTP boundary rule 5
+// (issue 016): HTTPS/HSTS -> security headers -> static files ->
+// authentication -> authorization, with errors/status codes outermost.
+app.UseCacheCowSecurityPipeline();
+
+// Test-only sample endpoints; never enabled by shipped configuration.
+TestOnlyEndpoints.MapIfEnabled(app);
+
 app.Run();
 
-/// <summary>Exposed for WebApplicationFactory-based smoke tests.</summary>
+/// <summary>Exposed for WebApplicationFactory-based integration tests.</summary>
 public partial class Program
 {
 }
