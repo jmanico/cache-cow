@@ -1,7 +1,7 @@
 # Cache Cow: Design System (DESIGN.md)
 
 Version 1.0 | Status: Draft for review
-Scope: consumer storefront, regional market variants (US, ES, DE, JP, IN), B2B API surface, wholesale/grocery portal, internal operations dashboard.
+Scope: consumer storefront, regional market variants (US, ES, MX, DE, JP, IN), B2B API surface, wholesale/grocery portal, internal operations dashboard.
 
 ---
 
@@ -200,7 +200,7 @@ Full catalog. Brisket-forward photography. Imperial units primary, metric second
 
 ### 8.3 Spanish markets (es-ES, es-MX)
 
-Confirm which market(s) launch; currency, tax display, and some vocabulary (e.g., "carne asada" registers differently) diverge between Spain and Mexico. Design assumes both are possible: all Spanish strings tagged by region variant. Text expansion budget applies everywhere.
+Both markets launch (per REQUIREMENTS.md CC-MKT-001); currency (EUR vs MXN), tax display, and some vocabulary (e.g., "carne asada" registers differently) diverge between Spain and Mexico. All Spanish strings are tagged by region variant (es-ES, es-MX). Text expansion budget applies everywhere.
 
 ### 8.4 Germany (de-DE)
 

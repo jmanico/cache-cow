@@ -29,7 +29,7 @@ A modular monolith-or-services decision is deliberately deferred; what follows f
 - Wholesale portal — utilitarian variant of the same design system (DESIGN.md §11).
 - Internal dashboard — **separate origin and session scope** from the storefront (CC-SEC-011, DESIGN.md §14), Pit-themed, network-restricted.
 - All three consume design tokens generated from DESIGN.md §§3–4 (`tokens.json`), self-hosted locale-subset fonts (CC-NFR-005), strict CSP with no inline handlers/styles (CC-SEC-003, DESIGN.md §14).
-- ⚠ CONFLICT TO RESOLVE: CC-SEC-001/002 name Zod and `dangerouslySetInnerHTML` (React idioms); with Angular the equivalent controls are typed schema validation at the HTTP boundary and a ban on `bypassSecurityTrust*`/`[innerHTML]` sinks. REQUIREMENTS.md should be amended to state the controls framework-neutrally.
+- ⚠ CONFLICT TO RESOLVE: CC-SEC-001/002 and DESIGN.md §14 name Zod and `dangerouslySetInnerHTML` (React idioms); with Angular the equivalent controls are typed schema validation at the HTTP boundary and a ban on `bypassSecurityTrust*`/`[innerHTML]` sinks. Both documents should state the controls framework-neutrally — fold into the upcoming security pass.
 
 **Server (.NET Core 10 / C# on Kubernetes, all private endpoints, REST):**
 Bounded contexts, each owning its data:
