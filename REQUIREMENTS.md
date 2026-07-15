@@ -6,7 +6,7 @@ Version 1.0 | Status: Draft for review
 
 ## 1. System overview
 
-Cache Cow is a multi-market direct-to-consumer and B2B commerce platform for frozen BBQ products with regional catalogs, regional pricing, five language markets (US English, Spanish, German, Japanese, India English/Hindi), grocery wholesale distribution, a B2B ordering API, and an internal operations dashboard covering sales, orders, invoices, and employee management.
+Cache Cow is a multi-market direct-to-consumer and B2B commerce platform for frozen BBQ products with regional catalogs, regional pricing, six markets with seven launch locales (US English, Spain Spanish, Mexican Spanish, German, Japanese, India English/Hindi), grocery wholesale distribution, a B2B ordering API, and an internal operations dashboard covering sales, orders, invoices, and employee management.
 
 Subsystems:
 
@@ -46,7 +46,7 @@ Subsystems:
 
 ## 5. Pricing, tax, and promotions (PRC)
 
-- CC-PRC-001 [P1]: Prices MUST be defined per SKU per market in the market's currency (USD, EUR, EUR, JPY, INR). No runtime FX conversion of consumer prices.
+- CC-PRC-001 [P1]: Prices MUST be defined per SKU per market in the market's currency (USD, EUR, MXN, EUR, JPY, INR). No runtime FX conversion of consumer prices.
 - CC-PRC-002 [P1]: Price display MUST follow market convention: DE/ES/JP/IN tax-inclusive; US tax-exclusive with estimated tax computed at checkout. DE MUST additionally display unit price per kilogram alongside every price (Preisangabenverordnung).
 - CC-PRC-003 [P1]: All monetary values MUST be stored and computed as integer minor units (or exact decimal type). Binary floating point MUST NOT be used for money anywhere, including tests.
 - CC-PRC-004 [P1]: All price formatting MUST use locale-aware formatting (`Intl.NumberFormat` or server equivalent). Hand-formatted currency strings are a defect.
@@ -92,7 +92,7 @@ Authorization requirements in this section are grounded in RFC 9700 (OAuth 2.0 S
 
 ## 9. Internationalization and localization (I18N)
 
-- CC-I18N-001 [P1]: UI languages at launch: en-US, es-ES, de-DE, ja-JP, en-IN, hi-IN. Locale MUST be user-selectable independent of market (CC-MKT-002).
+- CC-I18N-001 [P1]: UI languages at launch: en-US, es-ES, es-MX, de-DE, ja-JP, en-IN, hi-IN. Locale MUST be user-selectable independent of market (CC-MKT-002).
 - CC-I18N-002 [P1]: All user-facing strings MUST be externalized in ICU MessageFormat resources. String resources MUST NOT contain HTML. Interpolated values MUST be escaped by default. Translation files MUST be treated as untrusted input and schema-validated in CI (key parity across locales, no markup, placeholder consistency).
 - CC-I18N-003 [P1]: Dates, numbers, currency, and units MUST use locale-aware formatting; US displays imperial-primary weights, all other markets metric.
 - CC-I18N-004 [P1]: Every page MUST declare correct `lang` (and `hreflang` alternates for SEO) per rendered locale.
@@ -164,7 +164,7 @@ Baseline: OWASP ASVS 5.0 Level 2 for the whole platform. The requirements below 
 
 ## 16. Out of scope (v1)
 
-Native mobile apps; consumer subscriptions; loyalty program; marketplace/third-party sellers; markets beyond the five listed; in-house payment processing; recipe/community content; RTL locales (architecture MUST NOT preclude them, per DESIGN.md 13).
+Native mobile apps; consumer subscriptions; loyalty program; marketplace/third-party sellers; markets beyond the six listed; in-house payment processing; recipe/community content; RTL locales (architecture MUST NOT preclude them, per DESIGN.md 13).
 
 ## 17. Traceability
 
