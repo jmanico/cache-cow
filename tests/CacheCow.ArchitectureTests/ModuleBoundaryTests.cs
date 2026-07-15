@@ -17,6 +17,7 @@ public sealed class ModuleBoundaryTests
     {
         var moduleProjects = SolutionModel.AllProjects
             .Where(p => p.Name.StartsWith("CacheCow.Modules.", StringComparison.Ordinal))
+            .Where(p => !p.Name.EndsWith(".Tests", StringComparison.Ordinal))
             .Select(p => p.Name)
             .Order(StringComparer.Ordinal)
             .ToArray();
