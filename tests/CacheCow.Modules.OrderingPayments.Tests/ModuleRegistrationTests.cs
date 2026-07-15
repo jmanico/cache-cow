@@ -1,6 +1,10 @@
+using CacheCow.Modules.OrderingPayments.Addresses;
+using CacheCow.Modules.OrderingPayments.GuestAccess;
 using CacheCow.Modules.OrderingPayments.Idempotency;
 using CacheCow.Modules.OrderingPayments.Orders;
+using CacheCow.Modules.OrderingPayments.Payments;
 using CacheCow.Modules.OrderingPayments.Submission;
+using CacheCow.Modules.OrderingPayments.Webhooks;
 using CacheCow.SharedKernel.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -27,6 +31,11 @@ public sealed class ModuleRegistrationTests
         services.AddSingleton<IAuditSink>(new RecordingAuditSink());
         services.AddSingleton(new OrderSubmissionOptions(maxQuantityPerLine: 100));
         services.AddSingleton(new IdempotencyOptions(TimeSpan.FromHours(24)));
+        services.AddSingleton<ISigningSecretProvider>(
+            new StubSigningSecretProvider().With(Fixtures.StripeProcessor, Fixtures.StripeSecret));
+        services.AddSingleton<IProcessorStatusClient>(new StubProcessorStatusClient(ProcessorPaymentStatus.Paid));
+        services.AddSingleton(new WebhookVerificationOptions(Fixtures.MaxEventAge));
+        services.AddSingleton(new GuestAccessOptions(TimeSpan.FromDays(30)));
 
         services.AddOrderingPaymentsModule();
         return services.BuildServiceProvider();
@@ -44,6 +53,27 @@ public sealed class ModuleRegistrationTests
         Assert.NotNull(provider.GetRequiredService<OrderStateMachine>());
         Assert.IsType<Sha256RequestFingerprintStrategy>(provider.GetRequiredService<IRequestFingerprintStrategy>());
         Assert.IsType<InMemoryIdempotencyStore>(provider.GetRequiredService<IIdempotencyStore>());
+    }
+
+    [Fact]
+    [Requirement("CC-ORD-002")]
+    [Requirement("CC-ORD-009")]
+    [Requirement("CC-ORD-010")]
+    public void Module_registers_address_webhook_and_guest_access_services()
+    {
+        using var provider = BuildHostLikeProvider();
+
+        // Issue 038: the launch-market schema set is the default rule data.
+        Assert.NotNull(provider.GetRequiredService<AddressValidator>());
+
+        // Issue 041: verifier + payment authority over host-supplied ports.
+        Assert.NotNull(provider.GetRequiredService<WebhookVerifier>());
+        Assert.IsType<InMemoryWebhookReplayStore>(provider.GetRequiredService<IWebhookReplayStore>());
+        Assert.NotNull(provider.GetRequiredService<PaymentAuthorityService>());
+
+        // Issue 042: token service with digest-only in-memory store.
+        Assert.NotNull(provider.GetRequiredService<GuestAccessTokenService>());
+        Assert.IsType<InMemoryCapabilityTokenStore>(provider.GetRequiredService<ICapabilityTokenStore>());
     }
 
     [Fact]
