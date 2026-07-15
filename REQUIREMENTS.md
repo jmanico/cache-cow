@@ -1,6 +1,6 @@
 # Cache Cow: Platform Requirements (REQUIREMENTS.md)
 
-Version 1.1 | Status: Draft for review
+Version 1.3 | Status: Ratified — all open assumptions and legal-review flags resolved 2026-07-15 (decision record in ARCHITECTURE.md, "Known unknowns"). v1.3 adds requirements from the 2026-07-15 threat model (THREAT_MODEL.md): CC-MKT-009, CC-ORD-009/010, CC-WHS-005, CC-CMP-006, CC-SEC-013–022, and clauses on CC-PRC-003, CC-INV-002, CC-CMP-003. The threat model also reopened residency/transfer/portal-IdP decisions now tracked in ARCHITECTURE.md "Known unknowns".
 
 This document owns WHAT the system must do. Security requirements are authored in SECURITY.md (their CC-* IDs are kept below as pointers for traceability, §17). HOW the system is built is ARCHITECTURE.md; the design language is DESIGN.md.
 
@@ -36,6 +36,7 @@ Subsystems:
 - CC-MKT-006 [P1]: Market gating rules MUST be encoded as data (per-market policy configuration), not scattered conditionals, and MUST be covered by an automated test matrix (every gated route x every market).
 - CC-MKT-007 [P2]: US, ES, and DE markets MUST carry the full catalog including non-veg SKUs; vegetarian SKUs MUST be available and filterable in all markets.
 - CC-MKT-008 [P2]: Cross-market navigation MUST preserve the user's cart only where all cart items exist in the destination market; otherwise the user MUST be shown exactly which items were removed and why.
+- CC-MKT-009 [P1]: Gating MUST survive caching. No SSR, edge, or CDN cache may serve a response gated for one market/locale to another, and personalized or authenticated responses MUST NOT be edge-cached; cache keys derive from server-side transacting-market/locale state, never from client hints. This closes the path where a cached non-veg page is served into IN despite CC-MKT-003. Cache-key and SSR transfer-state enforcement authored in SECURITY.md (HTTP boundary, rule 10).
 
 ## 4. Catalog and menu (CAT)
 
@@ -49,8 +50,8 @@ Subsystems:
 ## 5. Pricing, tax, and promotions (PRC)
 
 - CC-PRC-001 [P1]: Prices MUST be defined per SKU per market in the market's currency (US=USD, ES=EUR, MX=MXN, DE=EUR, JP=JPY, IN=INR). No runtime FX conversion of consumer prices.
-- CC-PRC-002 [P1]: Price display MUST follow market convention: DE/ES/MX/JP/IN tax-inclusive (MX IVA-inclusive `[legal review required]`; IN inclusive with GST line on the invoice); US tax-exclusive with estimated tax computed at checkout. DE MUST additionally display unit price per kilogram alongside every price (Preisangabenverordnung).
-- CC-PRC-003 [P1]: All monetary values MUST be stored and computed as integer minor units (or exact decimal type). Binary floating point MUST NOT be used for money anywhere, including tests.
+- CC-PRC-002 [P1]: Price display MUST follow market convention: DE/ES/MX/JP/IN tax-inclusive (MX IVA-inclusive; IN inclusive with GST line on the invoice); US tax-exclusive with estimated tax computed at checkout. DE MUST additionally display unit price per kilogram alongside every price (Preisangabenverordnung).
+- CC-PRC-003 [P1]: All monetary values MUST be stored and computed as integer minor units (or exact decimal type). Binary floating point MUST NOT be used for money anywhere, including tests. Monetary arithmetic (quantity × unit price, discount, tax, totals) MUST use overflow-checked operations that fail closed rather than wrapping — relevant for large-grouping currencies (INR lakh/crore, JPY) and attacker-influenced quantities.
 - CC-PRC-004 [P1]: All price formatting MUST use locale-aware formatting (`Intl.NumberFormat` or server equivalent). Hand-formatted currency strings are a defect. Worked per-locale examples in DESIGN.md 4.4.
 - CC-PRC-005 [P1]: The server MUST recompute all prices, discounts, taxes, and totals at order submission from canonical data. Client-supplied prices MUST be ignored.
 - CC-PRC-006 [P2]: Promotions ("sale") MUST support: per-market percentage or fixed discounts, per-SKU or per-category scope, start/end timestamps (market timezone), and stacking rules (default: no stacking). Expired promotions MUST NOT apply even if cached UI still displays them; final authority is the order service.
@@ -61,13 +62,15 @@ Subsystems:
 - CC-ORD-001 [P1]: Guest checkout MUST be supported in all markets. Account creation MUST be optional at checkout.
 - CC-ORD-002 [P1]: Address capture MUST use per-market address formats and validation (including Japanese address structure and Indian PIN codes).
 - CC-ORD-003 [P1]: Payment processing MUST be delegated to an external PCI DSS Level 1 payment processor; card data never touches Cache Cow systems. Controls authored in SECURITY.md (Secret handling, rule 7).
-- CC-ORD-004 [P1]: Payment methods MUST include, at minimum per market: US cards; DE cards plus one dominant local method `[ASSUMPTION: PayPal and/or SEPA]`; ES cards; JP cards plus konbini or equivalent `[ASSUMPTION]`; IN UPI plus cards. Confirm local-method selection with payments provider.
+- CC-ORD-004 [P1]: Payment methods MUST include, at minimum per market: US cards; DE cards plus PayPal and SEPA; ES cards; JP cards plus konbini; IN UPI plus cards. Processors (confirmed 2026-07-15): Stripe for US/ES/MX/DE/JP (including the DE and JP local methods and Stripe Tax); Razorpay for IN.
 - CC-ORD-005 [P1]: Order submission MUST be idempotent (client idempotency key); double submission MUST NOT create duplicate orders or charges.
 - CC-ORD-006 [P1]: Order state machine MUST be: `received -> confirmed -> packed -> shipped -> delivered`, with `cancelled` and `refunded` as terminal branches, and every transition appended to the audit log (SECURITY.md, Logging rule 6).
 - CC-ORD-007 [P1]: Customers MUST receive order confirmation and shipment notification by email in their locale, containing no more personal data than necessary (no full address in email body).
 - CC-ORD-008 [P2]: Order tracking MUST expose the five consumer-facing stages defined in DESIGN.md §7 (Order tracker), mapped from the internal state machine plus carrier events.
+- CC-ORD-009 [P1]: Payment confirmation and funds capture MUST be authorized only by a signature-verified server-to-server callback from the processor (Stripe/Razorpay), reconciled by a server-initiated status check. A browser redirect back from a payment flow MUST NOT by itself confirm payment or advance an order. Inbound webhook verification and payment authority are authored in SECURITY.md (Input validation, rule 11).
+- CC-ORD-010 [P1]: Guest order status, tracking, and invoice access MUST be gated by an unguessable, expiring, server-revocable per-order capability token — never by a guessable or enumerable order-number-plus-email pair. Token handling authored in SECURITY.md (Authentication and authorization, rule 14).
 - CC-FUL-001 [P1]: Every consumer order MUST be routed to the regional cold store serving the delivery address; cross-region fulfillment MUST require explicit operations override (dashboard permission, audited).
-- CC-FUL-002 [P1]: Frozen shipping constraints MUST be enforced at checkout: serviceable postal-code validation per market and carrier transit-time limits for frozen product `[ASSUMPTION: max 48h transit; confirm cold-chain spec]`.
+- CC-FUL-002 [P1]: Frozen shipping constraints MUST be enforced at checkout: serviceable postal-code validation per market and carrier transit-time limits for frozen product (maximum 48 hours transit, ratified 2026-07-15).
 - CC-FUL-003 [P2]: DE (Widerrufsrecht) exception handling: perishable frozen food is exempt from the standard 14-day withdrawal right; legal texts MUST state this accurately and per legal review.
 
 ## 7. Grocery wholesale (B2B) (WHS)
@@ -75,7 +78,8 @@ Subsystems:
 - CC-WHS-001 [P2]: A wholesale portal MUST allow approved grocery partners to place case-quantity orders against wholesale price lists per market.
 - CC-WHS-002 [P2]: Partner onboarding MUST be an approval workflow executed in the internal dashboard (no self-service activation), with business identity captured per market (e.g., USt-IdNr. in DE, GSTIN in IN).
 - CC-WHS-003 [P2]: Wholesale prices and terms MUST be invisible to consumer sessions and MUST NOT be derivable from consumer API responses.
-- CC-WHS-004 [P2]: Wholesale orders MUST generate invoices per market legal format (see CC-INV) with payment terms (net-30 default) `[ASSUMPTION]`.
+- CC-WHS-004 [P2]: Wholesale orders MUST generate invoices per market legal format (see CC-INV) with payment terms (net-60 default, ratified 2026-07-15; adjustable per partner).
+- CC-WHS-005 [P1]: Human wholesale-portal buyers MUST authenticate with phishing-resistant MFA (WebAuthn passkeys); password-only and SMS-based MFA are prohibited. Portal sessions are tenant-scoped to the buyer's partner. This closes the gap where the authentication model covered consumers, staff, and B2B API clients but not the human partner buyers who see wholesale prices and place orders. Enforcement authored in SECURITY.md (Authentication and authorization, rule 15); the portal identity-provider choice is an open decision in ARCHITECTURE.md "Known unknowns".
 
 ## 8. B2B API (API)
 
@@ -86,7 +90,7 @@ Subsystems:
 - CC-API-005 [P1]: Order-creation endpoints MUST require an `Idempotency-Key` header; replays within the retention window MUST return the original result.
 - CC-API-006 [P1]: Request validation and machine-readable error format — authored in SECURITY.md (Input validation, rule 2; Logging, rule 1).
 - CC-API-007 [P1]: Market gating applies to the API identically to the storefront: a partner authorized for the IN market MUST NOT be able to order non-veg SKUs through any endpoint (CC-MKT-003 parity test required).
-- CC-API-008 [P1]: Per-client rate limits, default `[ASSUMPTION]`: 600 requests/minute, order creation 60/minute; tune per partner tier. Enforcement behavior authored in SECURITY.md (HTTP boundary, rule 7).
+- CC-API-008 [P1]: Per-client rate limits, default (ratified 2026-07-15): 600 requests/minute, order creation 60/minute; tune per partner tier. Enforcement behavior authored in SECURITY.md (HTTP boundary, rule 7).
 - CC-API-009 [P2]: Order-status webhooks MUST be delivered to registered partner HTTPS endpoints. Webhook security (signing, replay bounds, receiver validation) authored in SECURITY.md (Secret handling rule 8; Input validation rule 8).
 - CC-API-010 [P2]: API documentation MUST be generated from the same schemas the service validates against (single source of truth).
 
@@ -113,11 +117,11 @@ Subsystems:
 - CC-DSH-001 [P1]: Staff authentication and session policy (SSO, mandatory WebAuthn, 12-hour sessions, re-auth for sensitive actions) — authored in SECURITY.md (Authentication and authorization, rule 2).
 - CC-DSH-002 [P1]: Authorization MUST be role-based. Minimum roles: sales-viewer, ops-agent, finance, hr-admin, admin. Enforcement (least privilege, documented and tested role–permission matrix) authored in SECURITY.md (Authentication and authorization, rule 8).
 - CC-DSH-003 [P1]: Modules at launch: sales analytics (by market, SKU, channel), order management (search, state transitions, refunds), invoice management, inventory by cold store, partner (wholesale) management, employee management.
-- CC-DSH-004 [P1]: Every privileged action MUST write an audit event, retained `[ASSUMPTION]` 7 years for financial actions. Append-only enforcement and event fields authored in SECURITY.md (Logging, rule 6).
+- CC-DSH-004 [P1]: Every privileged action MUST write an audit event, retained 7 years for financial actions (ratified 2026-07-15). Append-only enforcement and event fields authored in SECURITY.md (Logging, rule 6).
 - CC-DSH-005 [P1]: Employee-record access restriction, compensation protection, and PII-export controls — authored in SECURITY.md (Authentication rule 12; Secret handling rule 6).
 - CC-DSH-006 [P2]: Sales analytics MUST include per-region per-SKU stock service level (the regional "cache hit rate"), revenue, AOV, and promotion performance, filterable by market and date range.
-- CC-INV-001 [P1]: Invoices MUST be generated per market legal requirements: sequential numbering per legal entity, market tax lines (US sales tax, EU VAT with rates and USt-IdNr., JP consumption tax with qualified-invoice number, IN GST with GSTIN and HSN codes) `[legal review required]`. Issued invoices are immutable; corrections occur via credit notes.
-- CC-INV-002 [P2]: Invoice PDFs MUST render from structured data server-side; consumer invoice email delivers a link to authenticated download, not an attachment containing full address data `[ASSUMPTION]`.
+- CC-INV-001 [P1]: Invoices MUST be generated per market legal requirements: sequential numbering per legal entity, market tax lines (US sales tax, EU VAT with rates and USt-IdNr., JP consumption tax with qualified-invoice number, IN GST with GSTIN and HSN codes). Issued invoices are immutable; corrections occur via credit notes.
+- CC-INV-002 [P2]: Invoice PDFs MUST render from structured data server-side; consumer invoice email delivers a link to authenticated download, not an attachment containing full address data (ratified 2026-07-15). For guest orders, which have no account session, "authenticated" means the unguessable per-order capability token of CC-ORD-010 (SECURITY.md, Authentication rule 14) — the link MUST NOT resolve to a guessable order identifier.
 
 ## 12. Security requirements (SEC)
 
@@ -135,14 +139,25 @@ All security requirements are authored in SECURITY.md, under an OWASP ASVS 5.0 L
 - CC-SEC-010 [P1]: Structured security logging — SECURITY.md, Logging rules 3–5.
 - CC-SEC-011 [P2]: Dashboard origin isolation and network restriction — SECURITY.md, HTTP boundary rule 8.
 - CC-SEC-012 [P2]: Geolocation is untrusted personalization data — SECURITY.md, Authentication rule 10.
+- CC-SEC-013 [P1]: Cache/SSR-safe gating (cache-key discipline, no cross-market cache reuse, no personalized-response caching, gated SSR transfer state) — SECURITY.md, HTTP boundary rule 10 (added by the 2026-07-15 threat model).
+- CC-SEC-014 [P1]: Inbound processor-webhook signature verification and payment authority (no order/funds movement on client redirect) — SECURITY.md, Input validation rule 11 and Secret handling rule 9.
+- CC-SEC-015 [P1]: Idempotency-key tenant/session scoping and request-fingerprint binding — SECURITY.md, Input validation rule 12.
+- CC-SEC-016 [P1]: Email-code (OTP) login hardening (entropy, expiry, single-use, throttling, enumeration-safety) — SECURITY.md, Authentication rule 13.
+- CC-SEC-017 [P1]: Guest order/invoice capability-token access control — SECURITY.md, Authentication rule 14.
+- CC-SEC-018 [P2]: Email domain authentication (SPF/DKIM/DMARC `p=reject`) — SECURITY.md, Email and messaging security rule 1.
+- CC-SEC-019 [P1]: Wholesale-portal human authentication (phishing-resistant MFA, tenant-scoped) — SECURITY.md, Authentication rule 15 (CC-WHS-005).
+- CC-SEC-020 [P1]: Database-enforced audit/invoice immutability (INSERT-only roles, WORM retention) — SECURITY.md, Logging rule 6.
+- CC-SEC-021 [P1]: Per-bounded-context least-privilege database roles and TLS on every data-store connection — SECURITY.md, Secret handling rule 10.
+- CC-SEC-022 [P2]: Ingress WAF + DDoS protection and signed-image admission/provenance — SECURITY.md, HTTP boundary rule 11 and Deployment rule 11.
 
 ## 13. Privacy and compliance (CMP)
 
 - CC-CMP-001 [P1]: GDPR applies to ES/DE (and EU visitors): lawful-basis mapping, DPA with processors, data-subject rights endpoints (access, deletion, portability) with identity verification, and consent management for non-essential cookies/analytics (no dark patterns; reject as easy as accept).
-- CC-CMP-002 [P1]: India DPDP Act 2023 and Japan APPI obligations MUST be assessed and implemented for their markets; US state privacy laws (CCPA/CPRA at minimum) honored for US consumers `[legal review required]`.
-- CC-CMP-003 [P1]: Data minimization and retention schedule MUST be documented per data class (orders, marketing, employee, logs) and enforced by automated deletion jobs.
-- CC-CMP-004 [P1]: Food-information compliance per market: EU FIC (allergens, nutrition declaration), FSSAI labeling for IN (CC-CNT-006), US FDA labeling, JP labeling `[legal review required]`. Structured data per CC-CAT-004 is the single source.
+- CC-CMP-002 [P1]: India DPDP Act 2023 and Japan APPI obligations MUST be assessed and implemented for their markets; US state privacy laws (CCPA/CPRA at minimum) honored for US consumers.
+- CC-CMP-003 [P1]: Data minimization and retention schedule MUST be documented per data class (orders, marketing, employee, logs) and enforced by automated deletion jobs. Deletion MUST propagate to backups, read replicas, search indexes, telemetry, and external processors (payment, email, CMS, carrier), and MUST be reconciled against the legal-hold retention that overrides erasure for immutable financial records (issued invoices and the 7-year financial audit — CC-INV-001, CC-DSH-004): a data-subject erasure request cannot mutate those, and the retained fields MUST be documented as the erasure exception.
+- CC-CMP-004 [P1]: Food-information compliance per market: EU FIC (allergens, nutrition declaration), FSSAI labeling for IN (CC-CNT-006), US FDA labeling, JP labeling. Structured data per CC-CAT-004 is the single source.
 - CC-CMP-005 [P2]: Marketing email MUST be opt-in per market law (double opt-in for DE), with functioning one-click unsubscribe (RFC 8058).
+- CC-CMP-006 [P1]: The cross-border transfer mechanism for every processor handling EU or India personal data (Stripe, Razorpay, EasyPost, Contentful, Microsoft Azure/Entra, Azure Communication Services) MUST be assessed and documented — adequacy decision, Standard Contractual Clauses, EU–US Data Privacy Framework, or equivalent — and telemetry/log and backup data residency MUST be reconciled with the EU-in-EU and India-in-India residency rules (CC-CMP-003; SECURITY.md, Secret handling rule 6). The unresolved primary-write-region-vs-residency question this exposes is tracked in ARCHITECTURE.md "Known unknowns".
 
 ## 14. Non-functional requirements (NFR)
 
