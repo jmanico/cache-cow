@@ -267,7 +267,7 @@ Real smoke, real bark, char and pink smoke ring visible, shot on dark steel and 
 
 Design decisions with direct security consequences, stated here so they survive into implementation:
 
-- No `dangerouslySetInnerHTML` anywhere, including CMS-driven marketing bands. Rich content renders through a strict allowlist renderer.
+- No raw-HTML injection sinks anywhere (`bypassSecurityTrust*`, unsanitized `[innerHTML]`), including CMS-driven marketing bands. Rich content renders through a strict allowlist renderer.
 - Translation strings are data, not markup: ICU MessageFormat with interpolated values escaped by default. Localization files are an injection surface (five languages means five supply chains for strings); no HTML in string files.
 - All `href`/`src` values pass URL validation with a `#` fallback; partner-store links in the locator are validated against a registered-domain allowlist.
 - CSP-friendly by construction: no inline handlers, no inline styles required by any component in this document.
