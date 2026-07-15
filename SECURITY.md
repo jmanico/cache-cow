@@ -1,6 +1,6 @@
 # Cache Cow: Security Rules (SECURITY.md)
 
-Version 0.2 | Status: Provisional — pending the dedicated security architecture pass (tracked in ARCHITECTURE.md, Known unknowns)
+Version 1.1 | Status: Ratified — the dedicated security architecture pass was satisfied by the open-decision resolution round of 2026-07-15 (decision record in ARCHITECTURE.md, "Known unknowns"); v1.1 folds in the 2026-07-15 threat-model findings (THREAT_MODEL.md), adding CC-SEC-013–018 and their controls
 
 This document is the single author of the platform's security requirements and controls. The security requirement IDs in REQUIREMENTS.md (CC-SEC-001–012 and the security clauses of other CC-* requirements) are pointers into this file; ARCHITECTURE.md and DESIGN.md reference these rules and never restate them. These rules govern **all code written in this repository, including AI-generated code** (merge gates in Deployment rule 7).
 
@@ -8,21 +8,23 @@ This document is the single author of the platform's security requirements and c
 
 - **OWASP ASVS 5.0 Level 2 applies in full, platform-wide.** The rules below are the platform-specific elaborations; they narrow ASVS, never relax it.
 - **RFC 9700 (OAuth 2.0 Security BCP)** governs B2B API authorization.
-- Confirmed stack these rules assume (from ARCHITECTURE.md): .NET Core 10 / C# / ASP.NET Core on Kubernetes, Azure Key Vault, all private endpoints, Angular clients, versioned REST B2B API, Terraform + GitOps.
+- Confirmed stack these rules assume (from ARCHITECTURE.md): .NET Core 10 / C# / ASP.NET Core modular monolith on Kubernetes (AKS), Azure Key Vault, Azure Database for PostgreSQL, Microsoft Entra identity, all private endpoints, Angular clients (Angular SSR storefront), versioned REST B2B API, Terraform + GitOps.
 
 ---
 
 ## HTTP boundary security
 
 1. Serve everything exclusively over HTTPS with TLS 1.2+ (1.3 preferred) (CC-SEC-008). Browser-facing apps (storefront, portal, dashboard) enforce with `UseHttpsRedirection()` and `UseHsts()` with preload; API hosts do not listen on plaintext HTTP at all — reject plaintext connections outright, never redirect (a redirect arrives after credentials have already leaked, and HSTS is a browser-only control) (CC-SEC-003).
-2. Ship a strict CSP on every HTML response: nonce- or hash-based scripts, no `unsafe-inline`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`; no component may require inline event handlers or inline styles — CSP-friendly by construction; collect CSP violation reports and roll out via Report-Only before enforcing (CC-SEC-003).
+2. Ship a strict CSP on every HTML response: nonce- or hash-based scripts, no `unsafe-inline`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`; no component may require inline event handlers or inline styles — CSP-friendly by construction; collect CSP violation reports and roll out via Report-Only before enforcing (CC-SEC-003). Redirect- and hosted-field-based payment methods break under `form-action 'self'` alone: `form-action`, `frame-src`, and `connect-src` MUST additionally allowlist the *exact* external origins each processor requires (Stripe, Razorpay, and the local methods PayPal, SEPA, konbini, UPI) — specific origins only, never wildcards or suffix matches — while every other directive stays default-deny.
 3. Emit `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, and a Permissions-Policy on every response; set `Cache-Control: no-store` on authenticated and sensitive responses (CC-SEC-003).
 4. Configure CORS with an explicit `WithOrigins()` allowlist only; never combine credentials with wildcard or suffix-matched origins (suffix matching is bypassable).
 5. Order ASP.NET Core middleware so HTTPS and security headers run before static files, then authentication, then authorization — in that order.
 6. Allowlist HTTP methods per route and reject everything else with 405; validate Content-Type and reject unexpected media types with 415.
 7. Cap request body sizes (Kestrel `MaxRequestBodySize`, `[RequestSizeLimit]`), clamp page sizes, and rate-limit per client with 429 + `Retry-After` — stricter on auth and order-creation endpoints; numeric defaults per partner tier are set in CC-API-008 (CC-CNT-004).
-8. The internal dashboard runs on a separate origin (or isolated subdomain with distinct session scope) from the consumer storefront, network-restricted (restriction model open — ARCHITECTURE.md, Known unknowns), on a private network path; storefront and portal never share cookies, tokens, or modules with it (CC-SEC-011).
+8. The internal dashboard runs on a separate origin (or isolated subdomain with distinct session scope) from the consumer storefront, network-restricted — VPN-only access, plus SSO with mandatory passkeys (confirmed 2026-07-15) — on a private network path; storefront and portal never share cookies, tokens, or modules with it (CC-SEC-011).
 9. Network topology (gateway-only public ingress; private endpoints for everything else) is authored in ARCHITECTURE.md (Technology decisions); any exposure beyond the gateways is a security defect.
+10. Caching must never defeat market/locale gating (CC-MKT-003). Any cacheable SSR, edge, or CDN response is keyed on the server-side transacting market and locale — never on a client hint (`Accept-Language`, geolocation, a cookie the client can forge) — so a response gated for one market is never served to another; authenticated, cart, checkout, and any per-user or personalized response is `Cache-Control: no-store` and never edge-cached; and the SSR-serialized transfer/hydration state embedded in HTML contains only data already authorized and gated for that exact response — never the ungated catalog, another market's SKUs (e.g. non-veg in IN), or another user's data (CC-SEC-013, CC-MKT-009).
+11. Application rate limits (rule 7) do not absorb network- or volumetric-layer floods: public ingress MUST sit behind DDoS protection and a WAF as defense in depth, so the 99.9% availability target (CC-NFR-001) and the 48-hour frozen-transit deadline (CC-FUL-002) survive a flood or an application-layer attack that slips a single rate limiter (CC-SEC-022).
 
 ## Authentication and authorization
 
@@ -32,12 +34,15 @@ This document is the single author of the platform's security requirements and c
 4. Never fall back to weaker recovery flows (SMS codes, security questions) that reintroduce phishable credentials; treat sign-in from an unrecognized device as a step-up event; let users register multiple passkeys including a hardware security key as recovery.
 5. B2B API clients authenticate via OAuth 2.0 client credentials per RFC 9700, with `private_key_jwt` or mutual TLS (RFC 8705); no static shared secrets, no API keys in query strings, no long-lived static keys (CC-API-002).
 6. Access tokens are sender-constrained where the client supports it (mTLS-bound per RFC 8705 or DPoP per RFC 9449) and short-lived (max 15 minutes); bearer-only tokens, where permitted for a client tier, are scoped read-only (CC-API-003).
-7. Validate JWTs fully: `ValidateIssuer`, `ValidateAudience`, `ValidateLifetime`, `ValidateIssuerSigningKey` all true, minimal clock skew (target zero, ≤ 2 minutes — derived hardening default, tighter than the ASP.NET Core 5-minute default; confirm in the security architecture pass), pinned `ValidAlgorithms` (reject `alg=none`), audience set to this API's specific resource identifier.
+7. Validate JWTs fully: `ValidateIssuer`, `ValidateAudience`, `ValidateLifetime`, `ValidateIssuerSigningKey` all true, minimal clock skew (target zero, ≤ 2 minutes — ratified 2026-07-15; tighter than the ASP.NET Core 5-minute default), pinned `ValidAlgorithms` (reject `alg=none`), audience set to this API's specific resource identifier.
 8. Enforce the least-privilege scopes defined in CC-API-004 and partner tenancy on every B2B endpoint; enforce RBAC least privilege on every dashboard endpoint with a documented, tested role–permission matrix, and design role-based views so each screen exposes only the fields the role requires — employee management especially (CC-DSH-002, CC-DSH-005).
 9. Enforce object-level authorization server-side on every resource access: scope every query to the caller's identity/tenant, with mandatory IDOR test coverage on orders, invoices, addresses, and partner data (CC-SEC-007, CC-QA-005). Return 404 for inaccessible resources as a derived hardening default (avoids confirming resource existence); the 404-not-403 behavior is a hard requirement for non-veg product URLs in the IN market (CC-MKT-004).
 10. IP-derived geolocation is untrusted personalization data: it may only *propose* a default market, which the user can override (CC-MKT-002). Every market/compliance gating decision (CC-MKT-003/004, CC-API-007) keys exclusively off the server-side transacting-market state — never off geolocation, `Accept-Language`, or any client-supplied locale hint (CC-SEC-012).
 11. Session cookies are HttpOnly, Secure, SameSite, with bounded expiry, server-side revocation, and session refresh on sign-in and privilege change; CSRF protection (`[AutoValidateAntiforgeryToken]` globally) on all cookie-authenticated state-changing requests — bearer-token API endpoints need none (CC-SEC-006).
 12. Employee records are restricted to the hr-admin role; employee PII leaves the system only through the audited export function (CC-DSH-005; compensation encryption under Secret handling rule 6).
+13. Email-code (OTP) login is a phishable-by-brute-force surface and MUST be hardened: single-use codes with at least 6 digits of cryptographic-RNG entropy, expiry ≤ 10 minutes, invalidated on use and on issuance of a newer code; per-account and per-IP rate limits on both code issuance and verification, with backoff/lockout after a small number of failed attempts; constant-time comparison; and responses and timing identical whether or not the address maps to an account (no user enumeration). Codes are never written to logs or telemetry (Logging rule 4) (CC-SEC-016).
+14. Guest orders (CC-ORD-001) carry no session identity, so guest access to order status, tracking, and invoices MUST be gated by an unguessable, single-purpose capability token (≥ 128 bits of entropy, bound to exactly one order, expiring, server-revocable) — never by a guessable or enumerable order-number-plus-email pair. Capability tokens are secrets: HTTPS-only, never logged, kept out of the `Referer` header (HTTP boundary rule 3), and out of analytics query strings. Authenticated-account access to the same resources stays under object-level authorization (rule 9) (CC-SEC-017, CC-ORD-010).
+15. Human wholesale-portal buyers are a distinct identity population from consumers, staff, and B2B API clients, and MUST authenticate with phishing-resistant MFA (WebAuthn passkeys); password-only access is prohibited, as is SMS-based MFA (rule 3). Portal sessions are tenant-scoped so a buyer sees only their own partner's price lists, orders, and invoices (CC-WHS-003, rule 9). The identity provider / federation model for portal buyers is an open decision (ARCHITECTURE.md, "Known unknowns") (CC-SEC-019, CC-WHS-005).
 
 ## Input validation
 
@@ -51,17 +56,25 @@ This document is the single author of the platform's security requirements and c
 8. Validate and allowlist any user-influenced URL before the server fetches it (webhook receivers, partner endpoints); block internal, loopback, and cloud-metadata addresses (SSRF); webhook receiver URLs are validated at registration and no redirects are followed at delivery (CC-API-009).
 9. If XML must ever be parsed, set `DtdProcessing.Prohibit` and `XmlResolver = null`; never use `BinaryFormatter` or JSON `TypeNameHandling` other than `None`.
 10. Contact and other public forms get server-side validation, rate limiting, and CAPTCHA-equivalent abuse control; user input never reaches SMTP headers (email header injection) (CC-CNT-004).
+11. Inbound webhooks and callbacks from external processors (Stripe, Razorpay) and other third parties (CMS publish events, carrier/EasyPost events) are an untrusted boundary: verify the sender's signature over the *raw* request body before parsing, reject on missing or invalid signature, and enforce timestamp/nonce replay bounds. Payment and order state MUST be driven by these signature-verified server-to-server callbacks, reconciled against a server-initiated confirmation call to the processor — never by client-supplied redirect parameters or success URLs. A browser return from a payment flow MUST NOT by itself confirm payment, capture funds, or advance an order; otherwise an attacker forges a "paid" return and receives free goods (CC-SEC-014, CC-ORD-009).
+12. Idempotency keys (CC-ORD-005, CC-API-005) MUST be scoped to the authenticated client/tenant — or, for consumers, the guest-checkout session — that issued them, so one partner's key can never collide with another's, and bound to a fingerprint of the original request. A replay with the same key returns the original stored result; the same key with a *different* request body is rejected with 409, never silently served the original and never processed as a new order (CC-SEC-015).
 
 ## Secret handling
 
 1. All secrets live in Azure Key Vault only — never in source, config files, client bundles, environment variables, or Terraform code/variables/state (CC-SEC-008).
 2. Authenticate every Azure SDK client with managed identity (`DefaultAzureCredential` or explicit `TokenCredential`); never embed keys or credentialed connection strings anywhere.
 3. Grant app identities only narrow data-plane RBAC roles scoped to specific resources (e.g., Key Vault Secrets User); never Contributor, Owner, or Key Vault Administrator.
-4. On Kubernetes, use a keyless workload-identity mechanism to reach Key Vault (e.g., Azure Workload Identity with the Key Vault CSI driver; exact mechanism TO BE CONFIRMED in the security architecture pass); do not bake secrets into images or manifests.
+4. On Kubernetes, reach Key Vault via Azure Workload Identity with the Key Vault Secrets Store CSI driver (confirmed 2026-07-15); do not bake secrets into images or manifests.
 5. Cache Key Vault secrets only with a TTL honoring expiry, and react to rotation events; never cache indefinitely.
-6. Encrypt data at rest; apply field-level encryption to employee compensation with Key Vault-managed keys (CC-DSH-005, CC-SEC-008).
+6. Encrypt data at rest; apply field-level encryption to employee compensation with Key Vault-managed keys (CC-DSH-005, CC-SEC-008). Database backups, snapshots, read replicas, and exports inherit the same encryption, data-residency (EU-in-EU, India-in-India), and retention/automated-deletion rules as their source data — a backup or replica is never a residency, retention, or erasure loophole (CC-CMP-003).
 7. Payment card data never enters the system: delegate all card handling to a PCI DSS Level 1 processor via hosted fields or redirect (SAQ A scope); no service may accept, log, or store primary account numbers (CC-ORD-003).
-8. Sign webhooks with per-partner rotating HMAC secrets sourced from Key Vault, with timestamps to bound replay (CC-API-009).
+8. Sign *outbound* webhooks to partners with per-partner rotating HMAC secrets sourced from Key Vault, with timestamps to bound replay (CC-API-009).
+9. Verification secrets for *inbound* processor webhooks (Stripe/Razorpay signing secrets and any shared verification material, per Input validation rule 11) live in Key Vault, are scoped per environment, and are rotated on the processor's schedule; signature-verification failures are logged and alerted as security events (Logging rule 3) (CC-SEC-014).
+10. The single PostgreSQL Flexible Server hosts all ten bounded contexts, so a code-enforced module boundary must not collapse at the connection string: each bounded context connects with its own least-privilege database role confined to its own schema, with no cross-context grants, and every data-store connection requires TLS. A logic or injection flaw in one module (e.g., the contact form) must not reach employee compensation, partner terms, or the audit store (CC-SEC-021).
+
+## Email and messaging security
+
+1. Every domain that sends platform mail through Azure Communication Services MUST publish and enforce SPF, DKIM, and DMARC (DMARC policy `p=reject`), with aggregate reports monitored. Order, shipment, OTP, and marketing mail are prime phishing lures; an unauthenticated sender domain lets an attacker spoof Cache Cow to its own customers. Transactional mail carries no more PII than necessary (CC-ORD-007) and never carries capability tokens or secrets in logged headers/metadata (CC-SEC-018).
 
 ## Logging and error handling
 
@@ -70,7 +83,7 @@ This document is the single author of the platform's security requirements and c
 3. Log security events — authn successes/failures, authz denials, validation rejections, admin actions — as structured logs to centralized monitoring with alerting (CC-SEC-010, CC-NFR-003).
 4. Never log credentials, tokens, passwords, connection strings, or PANs (which never exist in-system per Secret handling rule 7); redact PII; use structured log templates, never string interpolation into log messages (CC-SEC-010).
 5. Encode or sanitize user-supplied values before they enter log entries to prevent log injection.
-6. Write every privileged dashboard action and every order state transition to the append-only audit store (actor, action, object, before/after, timestamp); nothing mutates audit records or issued invoices — corrections are new records (credit notes, compensating events) (CC-DSH-004, CC-ORD-006, CC-INV-001).
+6. Write every privileged dashboard action and every order state transition to the append-only audit store (actor, action, object, before/after, timestamp); nothing mutates audit records or issued invoices — corrections are new records (credit notes, compensating events) (CC-DSH-004, CC-ORD-006, CC-INV-001). "Append-only" MUST be enforced by database privilege, not convention: application roles hold INSERT-only rights on audit and issued-invoice tables (no UPDATE/DELETE), and the audit/financial stream is replicated to retention-locked (WORM) storage for the 7-year window, so no single compromised application or DBA credential can both write and erase history (CC-SEC-020).
 7. In the Angular client, route errors through interceptors and a global ErrorHandler: full details logged server-side, users see generic messages with correlation IDs only; never surface raw error bodies or internal endpoints.
 8. Filter PII from telemetry pipelines; alert on Key Vault access denials and authentication failure spikes.
 9. Logs are in scope for the documented retention schedule and automated deletion jobs (CC-CMP-003).
@@ -87,6 +100,7 @@ This document is the single author of the platform's security requirements and c
 8. Run the market-gating test matrix, money-path tests, and authz cross-tenant/cross-role suite on every merge (CC-QA-003/004/005); DAST and penetration-test cadence per CC-QA-007.
 9. Build Angular with AOT (no JIT in production bundles), strict TypeScript and strictTemplates, subresource integrity enabled, and production source maps disabled.
 10. Self-host all fonts and static assets; no third-party runtime CDNs for fonts or scripts — third-party runtime CDNs are an unaudited supply chain (CC-NFR-005). Generate an SBOM per release (CC-SEC-009).
+11. Sign container images and verify signature and provenance at admission (image scanning per rule 6 detects known CVEs but not a substituted or tampered image); the cluster admits only signed images from the reviewed internal registry, closing the gap between "scanned" and "the artifact that actually runs" (CC-SEC-022, CC-SEC-009).
 
 ---
 
@@ -96,7 +110,7 @@ This section authors the dependency policy (CC-SEC-009): minimal third-party dep
 
 1. Do not add a dependency when the standard library or a few lines of first-party code will do.
 2. Prefer zero new dependencies; when a library is genuinely required, justify it in the PR description with a CVE-history review, maintenance check, and transitive analysis.
-3. Use only actively maintained libraries — a commit or release within the last 12 months (the 12-month window is this repository's elaboration of the CC-SEC-009 maintenance check, `[ASSUMPTION]` pending ratification).
+3. Use only actively maintained libraries — a commit or release within the last 6 months (ratified 2026-07-15, tightened from the drafted 12 months, as this repository's elaboration of the CC-SEC-009 maintenance check).
 4. Use only the latest stable major version; no deprecated, abandoned, or pre-release packages.
 5. Reject any library with known unpatched CVEs; check before adding it and again on every update.
 6. Audit transitive dependencies, not just direct ones; a small direct dependency with a large or unvetted tree is grounds for rejection.
@@ -114,4 +128,4 @@ This section authors the dependency policy (CC-SEC-009): minimal third-party dep
 - FIDO Alliance passkeys guidance — https://fidoalliance.org/passkeys/
 - Wiz Terraform security best practices — https://www.wiz.io/academy/application-security/terraform-security-best-practices/
 
-Open security decisions (identity provider, data stores, dashboard network-restriction model, region topology/data residency, observability tooling, and the dedicated security architecture pass) are tracked once, in ARCHITECTURE.md "Known unknowns".
+All formerly open security decisions (identity provider, data stores, dashboard network-restriction model, region topology/data residency, observability tooling, and the dedicated security architecture pass) were resolved 2026-07-15; the decision record lives in ARCHITECTURE.md "Known unknowns", which remains the single home for any future open decision.
