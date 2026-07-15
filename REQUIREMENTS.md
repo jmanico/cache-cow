@@ -123,8 +123,8 @@ Authorization requirements in this section are grounded in RFC 9700 (OAuth 2.0 S
 
 Baseline: OWASP ASVS 5.0 Level 2 for the whole platform. The requirements below are the platform-specific elaborations; ASVS L2 applies in full.
 
-- CC-SEC-001 [P1]: All input crossing a trust boundary (HTTP parameters, headers, bodies, webhooks, CMS content, translation files, partner uploads) MUST be validated against explicit schemas (Zod on the front end, JSON Schema server-side). Invalid input MUST be rejected, not sanitized into acceptance.
-- CC-SEC-002 [P1]: Output encoding MUST be context-appropriate everywhere; `dangerouslySetInnerHTML` and equivalent raw-HTML sinks MUST NOT appear in the codebase (CI grep gate). CMS rich text renders through an allowlist renderer only.
+- CC-SEC-001 [P1]: All input crossing a trust boundary (HTTP parameters, headers, bodies, webhooks, CMS content, translation files, partner uploads) MUST be validated against explicit schemas (typed schema validation such as Zod on the client, JSON Schema server-side). Invalid input MUST be rejected, not sanitized into acceptance.
+- CC-SEC-002 [P1]: Output encoding MUST be context-appropriate everywhere; raw-HTML sinks MUST NOT appear in the codebase — for the Angular client this means `bypassSecurityTrust*` and any `[innerHTML]`/`outerHTML` binding of content not produced by the allowlist renderer — enforced by CI grep gate. CMS rich text renders through an allowlist renderer only.
 - CC-SEC-003 [P1]: A strict Content Security Policy MUST be enforced (no `unsafe-inline` scripts, nonce or hash based), plus HSTS with preload, X-Content-Type-Options, and frame-ancestors restrictions. CSP violations MUST be report-collected.
 - CC-SEC-004 [P1]: All `href`/`src` values derived from data MUST pass URL validation (scheme allowlist https/mailto/tel) with `#` fallback; partner and locator links validated against a registered-domain allowlist.
 - CC-SEC-005 [P1]: Consumer authentication (optional accounts) MUST support WebAuthn passkeys and email-code login; passwords, if offered, per ASVS 5.0 V6 (length 8 to 64+, breached-password screening, no composition rules, no rotation policy).
