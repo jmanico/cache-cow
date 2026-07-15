@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- ARCHITECTURE.md Dependency rule 9: minimal shared kernel — market/locale
+       identifiers, money type, SKU identity, requirement-tagged test utilities.
+       No project references, no bounded-context knowledge (issue 001, AC-04). -->
+</Project>

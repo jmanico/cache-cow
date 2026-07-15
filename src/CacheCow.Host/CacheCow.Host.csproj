@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <!-- The single deployable ASP.NET Core application (ARCHITECTURE.md,
+       "Technology decisions": Packaging — modular monolith). The host is the
+       only project allowed to reference the bounded-context modules. -->
+  <ItemGroup>
+    <ProjectReference Include="..\CacheCow.SharedKernel\CacheCow.SharedKernel.csproj" />
+    <ProjectReference Include="..\Modules\CacheCow.Modules.MarketGating\CacheCow.Modules.MarketGating.csproj" />
+    <ProjectReference Include="..\Modules\CacheCow.Modules.CatalogInventory\CacheCow.Modules.CatalogInventory.csproj" />
+    <ProjectReference Include="..\Modules\CacheCow.Modules.PricingPromotions\CacheCow.Modules.PricingPromotions.csproj" />
+    <ProjectReference Include="..\Modules\CacheCow.Modules.OrderingPayments\CacheCow.Modules.OrderingPayments.csproj" />
+    <ProjectReference Include="..\Modules\CacheCow.Modules.Fulfillment\CacheCow.Modules.Fulfillment.csproj" />
+    <ProjectReference Include="..\Modules\CacheCow.Modules.WholesaleB2B\CacheCow.Modules.WholesaleB2B.csproj" />
+    <ProjectReference Include="..\Modules\CacheCow.Modules.Invoicing\CacheCow.Modules.Invoicing.csproj" />
+    <ProjectReference Include="..\Modules\CacheCow.Modules.BackOffice\CacheCow.Modules.BackOffice.csproj" />
+    <ProjectReference Include="..\Modules\CacheCow.Modules.IdentityAccess\CacheCow.Modules.IdentityAccess.csproj" />
+    <ProjectReference Include="..\Modules\CacheCow.Modules.ContentLocalization\CacheCow.Modules.ContentLocalization.csproj" />
+  </ItemGroup>
+</Project>

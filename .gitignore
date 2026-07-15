@@ -1,0 +1,17 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+artifacts/
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+
+# OS
+.DS_Store
+
+# Local tooling
+*.swp
