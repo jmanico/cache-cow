@@ -1,0 +1,17 @@
+/* Pit theme via tokens only (DESIGN.md §12; ARCHITECTURE.md, Dependency rule 8). */
+.gate {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 96px 24px 0;
+  text-align: center;
+}
+
+.gate-title {
+  font-size: var(--cc-type-size-4);
+  font-weight: var(--cc-weight-subhead);
+  margin: 0 0 16px;
+}
+
+.gate-body {
+  margin: 0 0 32px;
+}

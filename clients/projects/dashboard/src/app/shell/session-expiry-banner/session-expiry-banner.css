@@ -1,0 +1,15 @@
+/*
+ * Ember alert accent as border, Pitpaper text on Pit for AA body contrast
+ * (Ember body text on dark surfaces is reserved for large text; DESIGN.md §3.2).
+ */
+.session-banner {
+  margin: 0;
+  padding: 8px 24px;
+  border-block: 1px solid var(--cc-color-ember-500);
+  color: var(--cc-color-pitpaper-100);
+  font-weight: var(--cc-weight-ui-label);
+}
+
+.session-banner-expired {
+  border-block-width: 2px;
+}

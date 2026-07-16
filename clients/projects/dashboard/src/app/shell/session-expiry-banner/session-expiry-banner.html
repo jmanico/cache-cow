@@ -1,0 +1,9 @@
+@if (expiry.phase() === 'expiring') {
+  <p class="session-banner" role="status" data-testid="session-expiry-banner">
+    {{ i18n.t('session.expiresSoon', { minutes: expiry.minutesRemaining() }) }}
+  </p>
+} @else if (expiry.phase() === 'expired') {
+  <p class="session-banner session-banner-expired" role="alert" data-testid="session-expiry-banner">
+    {{ i18n.t('session.expired') }}
+  </p>
+}

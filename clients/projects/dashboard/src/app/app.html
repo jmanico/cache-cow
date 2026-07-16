@@ -1,13 +1,26 @@
 <!--
-  Minimal bootstrap shell only (issue 004): no feature pages here.
-  Internal dashboard — deploys to a separate origin with distinct session scope;
-  never shares modules/cookies/tokens with storefront or portal
-  (SECURITY.md, HTTP boundary rule 8; ARCHITECTURE.md, Dependency rule 4).
-  Pit-themed (DESIGN.md section 12). CSP-compatible by construction:
-  no inline event handlers, no inline styles (SECURITY.md, HTTP boundary rule 2).
+  Pit-themed dashboard shell (issue 079). Unauthenticated: only the sign-in
+  gate renders — no navigation, module names, or chrome leak past the gate
+  (CC-DSH-001; fail closed). Skip link first for keyboard users
+  (DESIGN.md section 13); focus-visible styling is global in styles.css.
 -->
-<main class="shell">
-  <h1>Cache Cow — {{ title() }}</h1>
-  <p class="shell-note">Internal operations dashboard shell.</p>
-</main>
-<router-outlet />
+@if (session.authenticated()) {
+  <a class="cc-skip-link" href="#cc-main" data-testid="skip-link">
+    {{ i18n.t('shell.skipToMain') }}
+  </a>
+  <header class="shell-header">
+    <a class="shell-title" routerLink="/">{{ i18n.t('shell.header.appName') }}</a>
+    <span class="shell-identity" data-testid="signed-in-as">
+      {{ i18n.t('shell.header.signedInAs', { name: session.identity()!.displayName }) }}
+    </span>
+  </header>
+  <app-session-expiry-banner />
+  <div class="shell-body">
+    <app-side-nav />
+    <main class="shell-main" id="cc-main" tabindex="-1">
+      <router-outlet />
+    </main>
+  </div>
+} @else {
+  <app-sign-in-gate />
+}

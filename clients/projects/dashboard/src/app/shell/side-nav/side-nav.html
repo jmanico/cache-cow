@@ -1,0 +1,25 @@
+@if (visibility.matrixConfigured) {
+  <nav class="side-nav" [attr.aria-label]="i18n.t('shell.nav.label')" data-testid="module-nav">
+    <ul class="side-nav-list">
+      @for (module of visibleModules(); track module.id) {
+        <li>
+          <a
+            class="side-nav-link"
+            [routerLink]="['/', module.path]"
+            routerLinkActive="active"
+            ariaCurrentWhenActive="page"
+            [attr.data-testid]="'nav-' + module.id"
+          >
+            {{ i18n.t(module.nameKey) }}
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+} @else {
+  <!-- Fail closed: no matrix authored yet (issue 080), so no module nav at all. -->
+  <section class="awaiting-config" role="status" data-testid="awaiting-config">
+    <h2 class="awaiting-config-title">{{ i18n.t('shell.nav.awaitingConfig.title') }}</h2>
+    <p class="awaiting-config-body">{{ i18n.t('shell.nav.awaitingConfig.body') }}</p>
+  </section>
+}

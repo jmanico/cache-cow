@@ -1,0 +1,23 @@
+<section
+  class="step-up"
+  role="alertdialog"
+  aria-labelledby="cc-stepup-title"
+  aria-describedby="cc-stepup-body"
+  data-testid="step-up-prompt"
+>
+  <h2 class="step-up-title" id="cc-stepup-title">{{ i18n.t('stepup.title') }}</h2>
+  <p class="step-up-body" id="cc-stepup-body">{{ i18n.t('stepup.body') }}</p>
+  <div class="step-up-actions">
+    <button type="button" class="cc-button" data-testid="step-up-confirm" (click)="confirmed.emit()">
+      {{ i18n.t('stepup.confirm') }}
+    </button>
+    <button
+      type="button"
+      class="cc-button cc-button-secondary"
+      data-testid="step-up-cancel"
+      (click)="dismissed.emit()"
+    >
+      {{ i18n.t('stepup.cancel') }}
+    </button>
+  </div>
+</section>

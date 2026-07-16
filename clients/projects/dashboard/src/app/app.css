@@ -1,0 +1,43 @@
+/*
+ * Shell chrome layout (issue 079). All color/type from tokens
+ * (ARCHITECTURE.md, Dependency rule 8); compact staff-tool density
+ * per DESIGN.md section 12.
+ */
+.shell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  height: 48px;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--cc-color-smoke-400);
+}
+
+.shell-title {
+  color: var(--cc-color-pitpaper-100);
+  text-decoration: none;
+  font-weight: var(--cc-weight-subhead);
+}
+
+.shell-identity {
+  color: var(--cc-color-smoke-400);
+  font-size: 0.85em;
+}
+
+.shell-body {
+  display: flex;
+  align-items: stretch;
+  min-height: calc(100vh - 48px);
+}
+
+app-side-nav {
+  flex: 0 0 240px;
+  padding: 16px 0;
+  border-right: 1px solid var(--cc-color-smoke-400);
+}
+
+.shell-main {
+  flex: 1;
+  padding: 24px;
+  min-width: 0;
+}
