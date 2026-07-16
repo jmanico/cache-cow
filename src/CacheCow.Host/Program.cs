@@ -1,4 +1,5 @@
 using CacheCow.Host.Composition;
+using CacheCow.Host.Composition.Seo;
 using CacheCow.Host.Security;
 using CacheCow.Host.TestSupport;
 using CacheCow.Modules.BackOffice;
@@ -71,6 +72,14 @@ app.UseCacheCowSecurityPipeline();
 // placeholder scheme authenticates nothing, so every /v1 request is denied by
 // the fallback policy (fail closed).
 app.MapWholesaleB2BApi();
+
+// Public SEO surfaces (issue 071): per-market sitemaps, the sitemap index, and
+// per-market product feeds, every entry filtered through the Market & Gating
+// enforcement point (CC-MKT-003/005, CC-I18N-004). Anonymous by explicit
+// opt-out from the fallback policy; market comes from the path only
+// (CC-SEC-012), and the responses are cacheable only under the market key
+// (CC-MKT-009).
+app.MapSeoSurfaces();
 
 // Test-only sample endpoints; never enabled by shipped configuration.
 TestOnlyEndpoints.MapIfEnabled(app);
