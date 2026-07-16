@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Threading.RateLimiting;
+using CacheCow.Modules.WholesaleB2B.RateLimits;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
@@ -57,10 +58,25 @@ internal sealed class RateLimiterOptionsConfigurator : IConfigureOptions<RateLim
                 "auth:" + ClientPartitionKey(context),
                 _ => ToFixedWindowOptions(settings.Authentication)));
 
+        // Order creation is shared by consumer checkout and the B2B API
+        // (B2BRateLimitPolicies.OrderCreation names this same policy). B2B
+        // principals partition per authenticated client via the module's
+        // documented key provider (CC-API-008); everyone else keeps the
+        // host's issue-019 keying.
         options.AddPolicy(RateLimitPolicies.OrderCreation, context =>
             RateLimitPartition.GetFixedWindowLimiter(
-                "order:" + ClientPartitionKey(context),
+                "order:" + (B2BRateLimitPartition.KeyFor(context.User) ?? ClientPartitionKey(context)),
                 _ => ToFixedWindowOptions(settings.OrderCreation)));
+
+        // The B2B default per-client policy (CC-API-008: 600 requests/minute
+        // ratified default, budgets from configuration), partitioned per
+        // authenticated B2B client via B2BRateLimitPartition.KeyFor; requests
+        // without a B2B client identity fall back to the host's anonymous
+        // keying and must not consume any partner's quota (issue 019).
+        options.AddPolicy(B2BRateLimitPolicies.Client, context =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                "b2b:" + (B2BRateLimitPartition.KeyFor(context.User) ?? ClientPartitionKey(context)),
+                _ => ToFixedWindowOptions(settings.B2BClient)));
 
         options.OnRejected = async (rejectedContext, cancellationToken) =>
         {

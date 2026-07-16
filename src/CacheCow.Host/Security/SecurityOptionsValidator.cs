@@ -52,6 +52,7 @@ public sealed class SecurityOptionsValidator : IValidateOptions<SecurityOptions>
         ValidateRatePolicy(failures, options.RateLimiting.Default, "Security:RateLimiting:Default");
         ValidateRatePolicy(failures, options.RateLimiting.Authentication, "Security:RateLimiting:Authentication");
         ValidateRatePolicy(failures, options.RateLimiting.OrderCreation, "Security:RateLimiting:OrderCreation");
+        ValidateRatePolicy(failures, options.RateLimiting.B2BClient, "Security:RateLimiting:B2BClient");
 
         var sameSite = options.SessionCookies.SameSite;
         if (!string.Equals(sameSite, "Strict", StringComparison.OrdinalIgnoreCase)

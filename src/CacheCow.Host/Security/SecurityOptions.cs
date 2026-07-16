@@ -144,6 +144,15 @@ public sealed class RateLimitingSettings
     public RateLimitPolicySettings Authentication { get; init; } = new() { PermitLimit = 10, WindowSeconds = 60 };
 
     public RateLimitPolicySettings OrderCreation { get; init; } = new() { PermitLimit = 60, WindowSeconds = 60 };
+
+    /// <summary>
+    /// The B2B per-client default policy ("b2b-client", CC-API-008: 600
+    /// requests/minute ratified 2026-07-15), partitioned per authenticated
+    /// B2B client. Per-partner tier overrides (IB2BRateLimitTierSource) await
+    /// the partner-resolution wiring of the Entra client directory (issue 056
+    /// note in the composition root).
+    /// </summary>
+    public RateLimitPolicySettings B2BClient { get; init; } = new() { PermitLimit = 600, WindowSeconds = 60 };
 }
 
 public sealed class RateLimitPolicySettings
