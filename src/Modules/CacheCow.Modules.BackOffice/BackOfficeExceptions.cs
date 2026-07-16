@@ -51,3 +51,17 @@ public sealed class AuditEventValidationException : BackOfficeException
     {
     }
 }
+
+/// <summary>
+/// A dashboard module value or query failed validation (issues 082/084/085):
+/// rejected outright, never sanitized or coerced into acceptance (SECURITY.md,
+/// Input validation rule 1). The endpoint layer presents this as a generic
+/// RFC 9457 400 with a correlation ID only (SECURITY.md, Logging rule 1).
+/// </summary>
+public sealed class DashboardValidationException : BackOfficeException
+{
+    public DashboardValidationException(string message)
+        : base(message)
+    {
+    }
+}
