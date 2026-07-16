@@ -10,6 +10,7 @@ import { Observable, throwError } from 'rxjs';
 import { InventoryPage } from './inventory-page';
 import { InventoryApi } from './inventory.api';
 import { InventoryView } from './inventory.types';
+import tokens from '../../../../../../tokens/dist/tokens.json';
 
 async function render(providers: Provider[] = []): Promise<ComponentFixture<InventoryPage>> {
   await TestBed.configureTestingModule({ imports: [InventoryPage], providers }).compileComponents();
@@ -68,9 +69,12 @@ describe('InventoryPage — availability badges (CC-CAT-003; DESIGN.md §§5.2, 
     const fixture = await render();
     const el = host(fixture);
     // Badge + plain text, never the badge alone — status is never color-only.
-    expect(el.textContent).toContain('CACHE HIT');
+    // Badge words assert against the generated tokens, never a local copy
+    // (ARCHITECTURE.md Dependency rule 8) — the same discipline the
+    // storefront's stock badge follows.
+    expect(el.textContent).toContain(tokens.status.cacheHit.badge);
     expect(el.textContent).toContain('In stock');
-    expect(el.textContent).toContain('WARMING');
+    expect(el.textContent).toContain(tokens.status.warming.badge);
     expect(el.textContent).toContain('Restocking');
   });
 
@@ -100,18 +104,18 @@ describe('InventoryPage — availability badges (CC-CAT-003; DESIGN.md §§5.2, 
       .toContain('cc-status-neutral');
   });
 
-  it('renders CACHE MISS only where the server said unavailable-in-region', async () => {
+  it('renders the cache-miss badge only where the server said unavailable-in-region', async () => {
     const fixture = await render();
     const el = host(fixture);
     const misses = [...el.querySelectorAll('.cc-badge')].filter(
-      (b) => b.textContent?.trim() === 'CACHE MISS',
+      (b) => b.textContent?.trim() === tokens.status.cacheMiss.badge,
     );
     expect(misses.length).toBe(1);
     // The client never derives this from onHandUnits: the restocking row is
     // also at 0 on hand and must NOT read as a miss (DESIGN.md 5.2).
     const restocking = el.querySelector('[data-testid="inventory-row-CS-US-TX1-RIBS-STLOUIS-2KG"]')!;
     expect(restocking.querySelectorAll('td')[4].textContent?.trim()).toBe('0');
-    expect(restocking.textContent).toContain('WARMING');
+    expect(restocking.textContent).toContain(tokens.status.warming.badge);
   });
 });
 

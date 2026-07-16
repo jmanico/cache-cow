@@ -15,6 +15,12 @@
  *
  * Errors render generic copy only — no raw bodies (SECURITY.md, Logging
  * rules 1 and 7).
+ *
+ * BADGE VOCABULARY COMES FROM THE GENERATED TOKENS (ARCHITECTURE.md
+ * Dependency rule 8; tokens/dist/tokens.json `status.*.badge`), identically
+ * to the storefront's stock badge: the §5.2 words are brand vocabulary, not
+ * locale copy, so no client hardcodes them. The plain-language lines stay
+ * locale strings.
  */
 
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
@@ -22,6 +28,7 @@ import { formatBasisPoints } from '../../core/format-percent';
 import { RowNav } from '../../core/row-nav';
 import { DashboardI18n, DashboardMessageKey } from '../../i18n/i18n.service';
 import { InventoryApi } from './inventory.api';
+import tokens from '../../../../../../tokens/dist/tokens.json';
 import {
   AvailabilityState,
   ColdStore,
@@ -40,21 +47,21 @@ import {
 const AVAILABILITY_PRESENTATION: Readonly<
   Record<
     AvailabilityState,
-    { readonly badgeKey: DashboardMessageKey; readonly plainKey: DashboardMessageKey; readonly accent: string }
+    { readonly badge: string; readonly plainKey: DashboardMessageKey; readonly accent: string }
   >
 > = {
   'in-stock': {
-    badgeKey: 'inventory.badge.inStock',
+    badge: tokens.status.cacheHit.badge,
     plainKey: 'inventory.plain.inStock',
     accent: 'cc-status-good',
   },
   restocking: {
-    badgeKey: 'inventory.badge.restocking',
+    badge: tokens.status.warming.badge,
     plainKey: 'inventory.plain.restocking',
     accent: 'cc-status-alert',
   },
   'unavailable-in-region': {
-    badgeKey: 'inventory.badge.unavailableInRegion',
+    badge: tokens.status.cacheMiss.badge,
     plainKey: 'inventory.plain.unavailableInRegion',
     accent: 'cc-status-neutral',
   },
@@ -135,8 +142,9 @@ export class InventoryPage {
     };
   }
 
+  /** Brand vocabulary from the generated tokens, not locale copy (Dependency rule 8). */
   protected badge(state: AvailabilityState): string {
-    return this.i18n.t(AVAILABILITY_PRESENTATION[state].badgeKey);
+    return AVAILABILITY_PRESENTATION[state].badge;
   }
 
   /** The plain-language line that ALWAYS accompanies the badge (§13). */
