@@ -1,0 +1,90 @@
+/*
+ * Partner module layout (issue 085; DESIGN.md §12 — compact staff density).
+ * Brand color/type resolve ONLY from the generated design tokens; the shared
+ * table/filter/badge utilities live in styles.css (ARCHITECTURE.md,
+ * Dependency rule 8).
+ */
+
+.page-title {
+  font-size: var(--cc-type-size-3);
+  font-weight: var(--cc-weight-subhead);
+  margin: 0 0 16px;
+}
+
+/* Sticky headers need a scroll container to stick within (DESIGN.md §12). */
+.table-scroll {
+  max-height: 60vh;
+  overflow: auto;
+}
+
+.partner-detail {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--cc-color-smoke-400);
+}
+
+.partner-detail-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.partner-detail-header h2 {
+  font-size: var(--cc-type-size-2);
+  font-weight: var(--cc-weight-subhead);
+  margin: 0;
+}
+
+.partner-ref {
+  margin-left: 8px;
+  font-size: var(--cc-type-size-1);
+  color: var(--cc-color-smoke-400);
+}
+
+/* The masked-identity explanation sits with the data it qualifies. */
+.identity-note {
+  max-width: 60ch;
+  color: var(--cc-color-smoke-400);
+}
+
+.identity-list {
+  margin: 0 0 16px;
+}
+
+.identity-item {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  min-height: 40px;
+}
+
+.identity-item dt {
+  min-width: 18ch;
+  font-weight: var(--cc-weight-ui-label);
+}
+
+.identity-item dd {
+  margin: 0;
+}
+
+.partner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.confirm-dialog {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--cc-color-ember-500);
+  border-radius: 4px;
+  max-width: 60ch;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}

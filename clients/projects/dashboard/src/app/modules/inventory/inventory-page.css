@@ -1,0 +1,23 @@
+/*
+ * Inventory module layout (issue 084; DESIGN.md §12 — compact staff density).
+ * Brand color/type resolve ONLY from the generated design tokens; the shared
+ * table/filter/badge utilities live in styles.css (ARCHITECTURE.md,
+ * Dependency rule 8).
+ */
+
+.page-title {
+  font-size: var(--cc-type-size-3);
+  font-weight: var(--cc-weight-subhead);
+  margin: 0 0 16px;
+}
+
+/* Sticky headers need a scroll container to stick within (DESIGN.md §12). */
+.table-scroll {
+  max-height: 70vh;
+  overflow: auto;
+}
+
+/* The plain-language line beside every status badge (DESIGN.md §§5.2, 13). */
+.availability-plain {
+  margin-left: 8px;
+}

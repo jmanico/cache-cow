@@ -6,6 +6,7 @@
  */
 
 import { signal } from '@angular/core';
+import { ActionPermissionMatrix, DASHBOARD_ACTION_IDS } from './action-permissions';
 import { DASHBOARD_MODULE_IDS } from './modules';
 import { RolePermissionMatrix } from './role-visibility';
 import {
@@ -52,4 +53,19 @@ export const TEST_ROLE_PERMISSION_MATRIX: RolePermissionMatrix = {
   'sales-viewer': ['sales'],
   'ops-agent': ['orders', 'inventory'],
   // 'finance' deliberately absent: an unlisted role gets nothing (fail closed).
+};
+
+/**
+ * TEST-ONLY action-permission matrix — NOT the authored matrix. Which roles
+ * may transition orders, issue refunds, or approve partners is an issue 080
+ * human decision (issue 082/085 open questions); these grants exist only to
+ * verify the per-action gating machinery honors whatever matrix is authored.
+ * The deliberate asymmetry (ops-agent transitions but never refunds) is a
+ * test fixture, not policy.
+ */
+export const TEST_ACTION_PERMISSION_MATRIX: ActionPermissionMatrix = {
+  admin: [...DASHBOARD_ACTION_IDS],
+  'ops-agent': ['orders.transition'], // can transition, can NOT refund
+  finance: ['orders.refund'], // can refund, can NOT transition
+  // 'sales-viewer' and 'hr-admin' deliberately absent: nothing (fail closed).
 };

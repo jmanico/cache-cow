@@ -1,0 +1,138 @@
+<h1 class="page-title">{{ i18n.t('module.partners.name') }}</h1>
+
+@if (loadError()) {
+  <p class="cc-status-alert" role="alert" data-testid="load-error">{{ i18n.t('common.loadError') }}</p>
+} @else if (partners().length === 0) {
+  <p data-testid="partners-empty">{{ i18n.t('partners.list.empty') }}</p>
+} @else {
+  <div class="table-scroll">
+    <table class="cc-table" data-testid="partners-table">
+      <thead>
+        <tr>
+          <th scope="col">{{ i18n.t('partners.col.id') }}</th>
+          <th scope="col">{{ i18n.t('partners.col.name') }}</th>
+          <th scope="col">{{ i18n.t('partners.col.market') }}</th>
+          <th scope="col">{{ i18n.t('partners.col.state') }}</th>
+          <th scope="col">{{ i18n.t('partners.col.applied') }}</th>
+        </tr>
+      </thead>
+      <!-- Roving tabindex + arrow keys (core/row-nav.ts); Enter opens detail. -->
+      <tbody appRowNav>
+        @for (partner of partners(); track partner.partnerRef) {
+          <tr
+            class="cc-row-link"
+            [attr.data-testid]="'partner-row-' + partner.partnerRef"
+            (click)="open(partner.partnerRef)"
+            (keydown.enter)="open(partner.partnerRef)"
+          >
+            <td class="cc-mono">{{ partner.partnerRef }}</td>
+            <td>{{ partner.name }}</td>
+            <td>{{ partner.market }}</td>
+            <td>
+              <!-- Badge ALWAYS carries its text: status is never color-only
+                   (DESIGN.md §13). -->
+              <span class="cc-badge" [class]="stateAccent(partner.state)">
+                {{ stateLabel(partner.state) }}
+              </span>
+            </td>
+            <td class="cc-mono">{{ when(partner.appliedAt) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (detail(); as partner) {
+  <section class="partner-detail" data-testid="partner-detail" aria-live="polite">
+    <header class="partner-detail-header">
+      <h2>
+        {{ partner.name }}
+        <span class="cc-mono partner-ref">{{ partner.partnerRef }}</span>
+      </h2>
+      <button
+        type="button"
+        class="cc-button cc-button-secondary"
+        data-testid="detail-close"
+        (click)="closeDetail()"
+      >
+        {{ i18n.t('partners.detail.close') }}
+      </button>
+    </header>
+
+    <p class="cc-mono" data-testid="partner-terms">
+      {{ i18n.t('partners.detail.terms', { days: partner.paymentTermsDays }) }}
+    </p>
+
+    <h3>{{ i18n.t('partners.detail.identity') }}</h3>
+    <!--
+      Masked identifiers only. The seam delivers no full value and the parser
+      rejects a payload that carries one, so there is nothing here to reveal;
+      the reveal/audit-export flow is unauthored (partners.types.ts).
+    -->
+    <p class="identity-note" data-testid="identity-note">
+      {{ i18n.t('partners.detail.identityMasked') }}
+    </p>
+    <dl class="identity-list" data-testid="identity-list">
+      @for (identity of partner.businessIdentities; track identity.kind) {
+        <div class="identity-item">
+          <dt>{{ identity.kind }}</dt>
+          <dd class="cc-mono" [attr.data-testid]="'identity-value-' + identity.kind">
+            {{ identity.maskedValue }}
+          </dd>
+        </div>
+      }
+    </dl>
+
+    @if (actionError()) {
+      <p class="cc-status-alert" role="alert" data-testid="action-error">
+        {{ i18n.t('common.actionError') }}
+      </p>
+    }
+
+    <!-- Actions: rendered only where the SERVER offers the action AND the
+         session holds the permission. Presentation gating only — the server
+         authorizes and audits regardless. -->
+    @if (visibleActions(partner).length > 0) {
+      <div class="partner-actions" role="group" [attr.aria-label]="i18n.t('partners.actions.legend')">
+        @for (action of visibleActions(partner); track action) {
+          <button
+            type="button"
+            class="cc-button"
+            [attr.data-testid]="'partner-action-' + action"
+            (click)="requestAction(action)"
+          >
+            {{ actionLabel(action) }}
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Plain-voice confirmation stating the consequence (DESIGN.md §§5.4, 9). -->
+    @if (pendingAction(); as action) {
+      <section
+        class="confirm-dialog"
+        role="alertdialog"
+        aria-labelledby="cc-partner-confirm"
+        data-testid="confirm-dialog"
+      >
+        <p id="cc-partner-confirm" data-testid="confirm-message">
+          {{ confirmMessage(action, partner.name) }}
+        </p>
+        <div class="confirm-actions">
+          <button type="button" class="cc-button" data-testid="confirm-accept" (click)="confirmAction()">
+            {{ i18n.t('common.confirm') }}
+          </button>
+          <button
+            type="button"
+            class="cc-button cc-button-secondary"
+            data-testid="confirm-cancel"
+            (click)="cancelAction()"
+          >
+            {{ i18n.t('common.cancel') }}
+          </button>
+        </div>
+      </section>
+    }
+  </section>
+}

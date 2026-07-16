@@ -1,0 +1,171 @@
+<h1 class="page-title">{{ i18n.t('module.orders.name') }}</h1>
+
+<!-- Keyboard-first search (DESIGN.md §12): labeled native controls, submit on Enter. -->
+<form class="cc-filters" role="search" (submit)="submitSearch($event)" data-testid="order-search">
+  <label>
+    {{ i18n.t('orders.search.market') }}
+    <select data-testid="search-market" (change)="setFrom($event.target, 'market')">
+      <option value="">{{ i18n.t('orders.search.any') }}</option>
+      @for (m of markets; track m) {
+        <option [value]="m">{{ m }}</option>
+      }
+    </select>
+  </label>
+  <label>
+    {{ i18n.t('orders.search.state') }}
+    <select data-testid="search-state" (change)="setFrom($event.target, 'state')">
+      <option value="">{{ i18n.t('orders.search.any') }}</option>
+      @for (s of states; track s) {
+        <option [value]="s">{{ stateName(s) }}</option>
+      }
+    </select>
+  </label>
+  <label>
+    {{ i18n.t('orders.search.ref') }}
+    <input
+      type="text"
+      class="cc-mono"
+      data-testid="search-ref"
+      [value]="orderRef()"
+      (input)="setFrom($event.target, 'orderRef')"
+    />
+  </label>
+  <label>
+    {{ i18n.t('orders.search.from') }}
+    <input
+      type="date"
+      class="cc-mono"
+      data-testid="search-from"
+      [value]="placedFrom()"
+      (change)="setFrom($event.target, 'placedFrom')"
+    />
+  </label>
+  <label>
+    {{ i18n.t('orders.search.to') }}
+    <input
+      type="date"
+      class="cc-mono"
+      data-testid="search-to"
+      [value]="placedTo()"
+      (change)="setFrom($event.target, 'placedTo')"
+    />
+  </label>
+  <button type="submit" class="cc-button" data-testid="search-submit">
+    {{ i18n.t('orders.search.submit') }}
+  </button>
+</form>
+
+@if (loadError()) {
+  <p class="cc-status-alert" role="alert" data-testid="load-error">{{ i18n.t('common.loadError') }}</p>
+} @else if (results().length === 0) {
+  <p data-testid="results-empty">{{ i18n.t('orders.results.empty') }}</p>
+} @else {
+  <div class="table-scroll">
+    <table class="cc-table" data-testid="order-results">
+      <thead>
+        <tr>
+          <th scope="col">{{ i18n.t('orders.col.ref') }}</th>
+          <th scope="col">{{ i18n.t('orders.col.market') }}</th>
+          <th scope="col">{{ i18n.t('orders.col.placed') }}</th>
+          <th scope="col">{{ i18n.t('orders.col.state') }}</th>
+          <th scope="col" class="cc-num">{{ i18n.t('orders.col.items') }}</th>
+          <th scope="col" class="cc-num">{{ i18n.t('orders.col.total') }}</th>
+        </tr>
+      </thead>
+      <!-- Roving tabindex + arrow keys (core/row-nav.ts); Enter opens detail. -->
+      <tbody appRowNav>
+        @for (order of results(); track order.orderRef) {
+          <tr
+            class="cc-row-link"
+            [attr.data-testid]="'order-row-' + order.orderRef"
+            (click)="open(order.orderRef)"
+            (keydown.enter)="open(order.orderRef)"
+          >
+            <td class="cc-mono">{{ order.orderRef }}</td>
+            <td>{{ order.market }}</td>
+            <td class="cc-mono">{{ when(order.placedAt) }}</td>
+            <td>{{ stateName(order.state) }}</td>
+            <td class="cc-num">{{ order.itemCount }}</td>
+            <td class="cc-num">{{ money(order.totalMinor, order.currency) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (detail(); as order) {
+  <section class="order-detail" data-testid="order-detail" aria-live="polite">
+    <header class="order-detail-header">
+      <h2 class="cc-mono">{{ i18n.t('orders.detail.title', { ref: order.orderRef }) }}</h2>
+      <button
+        type="button"
+        class="cc-button cc-button-secondary"
+        data-testid="detail-close"
+        (click)="closeDetail()"
+      >
+        {{ i18n.t('orders.detail.close') }}
+      </button>
+    </header>
+
+    <h3>{{ i18n.t('orders.detail.history') }}</h3>
+    <table class="cc-table" data-testid="state-history">
+      <thead>
+        <tr>
+          <th scope="col">{{ i18n.t('orders.hist.state') }}</th>
+          <th scope="col">{{ i18n.t('orders.hist.at') }}</th>
+          <th scope="col">{{ i18n.t('orders.hist.actor') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (event of order.history; track $index) {
+          <tr>
+            <td>{{ stateName(event.state) }}</td>
+            <td class="cc-mono">{{ when(event.at) }}</td>
+            <td>{{ event.actor }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (actionError()) {
+      <p class="cc-status-alert" role="alert" data-testid="action-error">
+        {{ i18n.t('common.actionError') }}
+      </p>
+    }
+
+    <!-- Actions: per-action permission gating (presentation only; server
+         authorizes regardless). Transition targets come from the SERVER's
+         allowedTransitions — the client never computes legality. -->
+    @if (actions.can('orders.transition') || (actions.can('orders.refund') && order.refundEligible)) {
+      <div class="order-actions" role="group" [attr.aria-label]="i18n.t('orders.actions.legend')">
+        @if (actions.can('orders.transition')) {
+          @for (target of order.allowedTransitions; track target) {
+            <button
+              type="button"
+              class="cc-button"
+              [attr.data-testid]="'transition-' + target"
+              (click)="transition(target)"
+            >
+              {{ i18n.t('orders.actions.transition', { state: stateName(target) }) }}
+            </button>
+          }
+        }
+        @if (actions.can('orders.refund') && order.refundEligible) {
+          <button
+            type="button"
+            class="cc-button cc-button-secondary"
+            data-testid="refund-action"
+            (click)="requestRefund()"
+          >
+            {{ i18n.t('orders.actions.refund') }}
+          </button>
+        }
+      </div>
+    }
+
+    @if (stepUpPending()) {
+      <app-step-up-prompt (confirmed)="onStepUpConfirmed()" (dismissed)="onStepUpDismissed()" />
+    }
+  </section>
+}
