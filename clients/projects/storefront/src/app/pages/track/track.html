@@ -1,0 +1,18 @@
+<section class="track">
+  <h1 class="track-title">{{ i18n.t('track.title') }}</h1>
+
+  @switch (state().kind) {
+    @case ('loading') {
+      <p class="track-message" data-testid="track-loading">{{ i18n.t('track.loading') }}</p>
+    }
+    @case ('error') {
+      <!-- Generic, states what to do next; no mascots (DESIGN.md 9). -->
+      <p class="track-message" data-testid="track-error">{{ i18n.t('track.error') }}</p>
+    }
+    @case ('ready') {
+      @if (tracking(); as tracking) {
+        <app-order-tracker [tracking]="tracking" />
+      }
+    }
+  }
+</section>

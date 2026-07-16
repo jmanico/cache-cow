@@ -1,0 +1,151 @@
+/* Product detail (DESIGN.md 10) on the 1200px grid (DESIGN.md 6). Tokens only. */
+.pdp {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 32px 24px 64px;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 32px;
+}
+
+/* Gallery placeholder (aspect rules open — issue 067). */
+.pdp-gallery {
+  aspect-ratio: 4 / 5;
+  border-radius: 12px;
+  background: var(--cc-color-butcher-300);
+  border: 1px solid var(--cc-color-smoke-400);
+}
+
+.pdp-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.pdp-name {
+  margin: 0;
+  font-family: var(--cc-font-display), serif;
+  font-weight: var(--cc-weight-body);
+  font-size: var(--cc-type-size-5);
+  line-height: 1.15;
+  color: var(--cc-color-char-900);
+  overflow-wrap: break-word;
+}
+
+:lang(ja) .pdp-name {
+  font-family: var(--cc-font-display-ja-jp), sans-serif;
+  font-weight: var(--cc-weight-display-ja-jp);
+  border-bottom: 6px solid var(--cc-color-ember-500);
+  padding-bottom: 8px;
+  align-self: flex-start;
+}
+
+:lang(hi) .pdp-name {
+  font-family: var(--cc-font-display-hi-in), sans-serif;
+  font-weight: var(--cc-weight-display-hi-in);
+  border-bottom: 6px solid var(--cc-color-ember-500);
+  padding-bottom: 8px;
+  align-self: flex-start;
+}
+
+/* Cut/weight data in Plex Mono (DESIGN.md 4.1). */
+.pdp-meta {
+  margin: 0;
+  font-family: var(--cc-font-data), monospace;
+  font-size: 0.9em;
+  color: var(--cc-color-bark-700);
+  overflow-wrap: break-word;
+}
+
+.pdp-price {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.price-amount {
+  font-family: var(--cc-font-data), monospace;
+  font-weight: var(--cc-weight-subhead);
+  font-size: var(--cc-type-size-2);
+}
+
+.price-tax-note {
+  font-size: 0.9em;
+  color: var(--cc-color-bark-700);
+}
+
+.pdp-unit-price {
+  margin: 0;
+  font-family: var(--cc-font-data), monospace;
+  font-size: 0.9em;
+  color: var(--cc-color-bark-700);
+}
+
+.pdp-serves {
+  margin: 0;
+  color: var(--cc-color-bark-700);
+}
+
+.pdp-section {
+  margin-top: 12px;
+}
+
+.pdp-section-title {
+  margin: 0 0 8px;
+  font-family: var(--cc-font-body), sans-serif;
+  font-weight: var(--cc-weight-subhead);
+  font-size: var(--cc-type-size-2);
+  color: var(--cc-color-char-900);
+  overflow-wrap: break-word;
+}
+
+.pdp-list {
+  margin: 0;
+  padding-inline-start: 20px;
+}
+
+.pdp-text {
+  margin: 0;
+  max-width: 70ch;
+  overflow-wrap: break-word;
+}
+
+.pdp-reheat-format {
+  margin: 8px 0 4px;
+  font-weight: var(--cc-weight-subhead);
+  font-size: var(--cc-type-size-1);
+}
+
+.pdp-table {
+  border-collapse: collapse;
+}
+
+.pdp-table th {
+  text-align: start;
+  font-weight: var(--cc-weight-ui-label);
+  padding: 4px 24px 4px 0;
+  border-bottom: 1px solid var(--cc-color-smoke-400);
+}
+
+/* Numbers in Plex Mono, right-aligned (DESIGN.md 4.1/12). */
+.pdp-table-value {
+  font-family: var(--cc-font-data), monospace;
+  text-align: end;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--cc-color-smoke-400);
+}
+
+.pdp-message {
+  margin: 0;
+  color: var(--cc-color-bark-700);
+}
+
+@media (max-width: 768px) {
+  .pdp {
+    grid-template-columns: 1fr;
+    padding: 24px 16px 48px;
+  }
+}

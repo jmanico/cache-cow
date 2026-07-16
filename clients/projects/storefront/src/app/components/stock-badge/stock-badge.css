@@ -1,0 +1,41 @@
+/* Cache-status badge (DESIGN.md 5.2). Status colors ONLY from the generated
+ * status tokens (Dependency rule 8); Plex Mono Bold for badges, one type
+ * step below surrounding body text (DESIGN.md 4.1/4.3). Never color alone:
+ * the plain line always renders beside the badge (DESIGN.md 13). */
+.stock-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 0;
+}
+
+.stock-badge {
+  font-family: var(--cc-font-data), monospace;
+  font-weight: var(--cc-weight-subhead);
+  font-size: 0.8em;
+  letter-spacing: 0.06em;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+.stock-status-cacheHit .stock-badge {
+  color: var(--cc-status-cache-hit-color);
+}
+
+.stock-status-warming .stock-badge {
+  color: var(--cc-status-warming-color);
+}
+
+.stock-status-cacheMiss .stock-badge {
+  color: var(--cc-status-cache-miss-color);
+}
+
+/* Plain line stays readable body text (wraps at 130% expansion, CC-I18N-005). */
+.stock-line {
+  font-size: 0.9em;
+  color: var(--cc-color-bark-700);
+  overflow-wrap: break-word;
+}

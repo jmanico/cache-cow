@@ -1,0 +1,122 @@
+/* Order tracker (DESIGN.md 7/5.1). Ember for reached arcs, Smoke for
+ * pending — tokens only (Dependency rule 8). Status is never color alone:
+ * the stage list carries labels, timestamps, and "not yet" text. */
+.tracker {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tracker-order {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.tracker-order-label {
+  font-weight: var(--cc-weight-ui-label);
+  color: var(--cc-color-bark-700);
+}
+
+/* Monospace order numbers (DESIGN.md 1 "Brand personality", 4.1). */
+.tracker-order-number {
+  font-family: var(--cc-font-data), monospace;
+}
+
+.tracker-arcs {
+  display: block;
+}
+
+.arc {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.arc-reached {
+  stroke: var(--cc-color-ember-500);
+}
+
+.arc-pending {
+  stroke: var(--cc-color-smoke-400);
+}
+
+/* Arc-fill animation: applied ONLY when the component enabled it (browser,
+ * no reduced-motion preference). Without .tracker-animate — SSR, reduced
+ * motion, or no matchMedia — arcs render in final state, no animation. */
+.tracker-animate .arc-reached {
+  stroke-dasharray: 1;
+  animation: cc-arc-fill 500ms ease-out backwards;
+}
+
+.tracker-animate .arc-reached:nth-child(2) {
+  animation-delay: 150ms;
+}
+.tracker-animate .arc-reached:nth-child(3) {
+  animation-delay: 300ms;
+}
+.tracker-animate .arc-reached:nth-child(4) {
+  animation-delay: 450ms;
+}
+.tracker-animate .arc-reached:nth-child(5) {
+  animation-delay: 600ms;
+}
+
+@keyframes cc-arc-fill {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Double guard (DESIGN.md 13): even if the class is present, an OS-level
+ * reduced-motion preference kills the animation — final state renders. */
+@media (prefers-reduced-motion: reduce) {
+  .tracker-animate .arc-reached {
+    animation: none;
+  }
+}
+
+.tracker-stages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tracker-stage {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  color: var(--cc-color-bark-700);
+}
+
+.tracker-stage-reached {
+  color: var(--cc-color-char-900);
+}
+
+.tracker-stage-label {
+  font-weight: var(--cc-weight-ui-label);
+  min-width: 10ch;
+  overflow-wrap: break-word;
+}
+
+/* Timestamps in Plex Mono (DESIGN.md 7/4.1). */
+.tracker-stage-time {
+  font-family: var(--cc-font-data), monospace;
+  font-size: 0.9em;
+}
+
+/* bark.700, not smoke.400: this is readable status text, so it must meet
+ * AA contrast (DESIGN.md 3.2/13) — smoke is for borders/disabled only. */
+.tracker-stage-pending {
+  font-size: 0.9em;
+  color: var(--cc-color-bark-700);
+}

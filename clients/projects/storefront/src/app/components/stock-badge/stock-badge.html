@@ -1,0 +1,7 @@
+<!-- Badge + plain line, always paired (DESIGN.md 5.2/13). The status is plain
+     text content, readable by assistive technology as-is; the class only adds
+     the token color on top. -->
+<p [class]="'stock-status stock-status-' + state()" data-testid="stock-status">
+  <span class="stock-badge" data-testid="stock-badge">{{ badgeText() }}</span>
+  <span class="stock-line" data-testid="stock-line">{{ i18n.t(lineKey()) }}</span>
+</p>

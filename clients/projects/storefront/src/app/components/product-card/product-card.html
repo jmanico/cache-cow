@@ -1,0 +1,48 @@
+<article class="product-card" data-testid="product-card" [attr.data-sku]="product().sku">
+  <!-- 4:5 photo placeholder (DESIGN.md 7); real photography direction is 8.6
+       (open). Decorative: the card link carries the product name. -->
+  <div class="card-media" aria-hidden="true"></div>
+
+  <h3 class="card-name">
+    <!-- Stretched link: the entire card is this one link (DESIGN.md 7). -->
+    <a class="card-link" data-testid="card-link" [routerLink]="['/product', product().sku]">
+      {{ product().name }}
+    </a>
+  </h3>
+
+  <p class="card-meta">{{ i18n.t('card.cutWeight', { cut: i18n.t(cutKey()), weight: product().netWeightDisplay }) }}</p>
+
+  <app-stock-badge [state]="product().stockState" />
+  <app-veg-indicator [marking]="product().vegMarking" />
+
+  <p class="card-price">
+    <span class="price-amount" data-testid="card-price">{{ priceText() }}</span>
+    <span class="price-tax-note" data-testid="tax-note">{{ i18n.t(taxNoteKey()) }}</span>
+  </p>
+
+  @if (product().price.unitPerKgMinor !== undefined) {
+    <!-- DE unit price per kg (CC-PRC-002, DESIGN.md 8.4): rendered if and
+         only if the server sent it — no market conditional here. -->
+    <p class="card-unit-price" data-testid="unit-price">
+      {{ i18n.t('price.perKg', { price: unitPerKgText() }) }}
+    </p>
+  }
+
+  @switch (product().stockState) {
+    @case ('cacheHit') {
+      <button type="button" class="card-action" data-testid="card-action" (click)="onAction()">
+        {{ i18n.t('card.addToCart') }}
+      </button>
+    }
+    @case ('warming') {
+      <!-- Restocking = preorder permitted (CC-CAT-003). -->
+      <button type="button" class="card-action" data-testid="card-action" (click)="onAction()">
+        {{ i18n.t('card.preorder') }}
+      </button>
+    }
+    @case ('cacheMiss') {
+      <!-- No purchase action when unavailable in region (issue 066 AC-07);
+           nearest-substitute mechanism is an open question. -->
+    }
+  }
+</article>
