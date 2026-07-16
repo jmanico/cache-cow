@@ -98,6 +98,60 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Plex Mono without the right alignment (order refs, SKUs, dates in cells
+   that are identifiers rather than quantities — DESIGN.md section 12). */
+.cc-mono {
+  font-family: var(--cc-font-data), monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Status badge: mono, uppercase-by-content, always paired with plain text
+   in the template — status is never color-only (DESIGN.md sections 5.2, 13). */
+.cc-badge {
+  display: inline-block;
+  font-family: var(--cc-font-data), monospace;
+  font-weight: var(--cc-weight-subhead);
+  font-size: 0.85em;
+  border: 1px solid currentcolor;
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+/* Rows that open a detail view (issues 082/085). */
+.cc-row-link {
+  cursor: pointer;
+}
+
+/* Compact filter/search bars (DESIGN.md section 12, keyboard-first). */
+.cc-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+}
+
+.cc-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9em;
+  font-weight: var(--cc-weight-ui-label);
+}
+
+.cc-filters input,
+.cc-filters select {
+  font: inherit;
+  color: var(--cc-color-pitpaper-100);
+  background: var(--cc-color-pit-950);
+  border: 1px solid var(--cc-color-smoke-400);
+  border-radius: 4px;
+  padding: 6px 8px;
+  min-height: 32px;
+}
+
 /* Status accents: one accent family per meaning (DESIGN.md section 12). */
 .cc-status-good {
   color: var(--cc-color-cache-500);

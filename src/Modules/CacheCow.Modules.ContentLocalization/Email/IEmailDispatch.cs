@@ -10,11 +10,11 @@ namespace CacheCow.Modules.ContentLocalization.Email;
 /// </summary>
 public interface IEmailDispatch
 {
-    Task DispatchAsync(ComposedOrderEmail email, string recipientEmailAddress, CancellationToken cancellationToken);
+    Task DispatchAsync(ComposedEmail email, string recipientEmailAddress, CancellationToken cancellationToken);
 }
 
 /// <summary>A dispatched message as recorded by the in-memory port.</summary>
-public sealed record DispatchedEmail(ComposedOrderEmail Email, string RecipientEmailAddress);
+public sealed record DispatchedEmail(ComposedEmail Email, string RecipientEmailAddress);
 
 /// <summary>In-memory recording dispatcher for tests and the provisional module default.</summary>
 public sealed class InMemoryEmailDispatch : IEmailDispatch
@@ -23,7 +23,7 @@ public sealed class InMemoryEmailDispatch : IEmailDispatch
 
     public IReadOnlyList<DispatchedEmail> Dispatched => _dispatched;
 
-    public Task DispatchAsync(ComposedOrderEmail email, string recipientEmailAddress, CancellationToken cancellationToken)
+    public Task DispatchAsync(ComposedEmail email, string recipientEmailAddress, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(email);
         ArgumentException.ThrowIfNullOrWhiteSpace(recipientEmailAddress);

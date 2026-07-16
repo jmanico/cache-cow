@@ -1,0 +1,81 @@
+/* Interactive steer diagram (DESIGN.md 7): Char linework on Paper, Plex Mono
+ * numbering. Deliberately technical — a diagram, not a character: outline
+ * strokes only, zero shared DNA with the cow-mascot illustrations (8.1).
+ * Tokens only (Dependency rule 8). */
+.cut-diagram {
+  position: relative;
+  max-width: 640px;
+  background: var(--cc-color-paper-100);
+  border: 1px solid var(--cc-color-smoke-400);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.cut-art {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Char linework: strokes, never fills (DESIGN.md 7). */
+.cut-line {
+  fill: none;
+  stroke: var(--cc-color-char-900);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* Region buttons overlaid on the art. Positions are static per region
+ * (data-cut), so no inline styles are needed (CSP discipline). */
+.cut-region {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 15%;
+  height: 22%;
+  padding: 0;
+  background: transparent;
+  border: 1px dashed var(--cc-color-smoke-400);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cut-region:hover {
+  border-color: var(--cc-color-ember-500);
+  border-style: solid;
+}
+
+/* Visible focus: 2px Ember outline on light surfaces (DESIGN.md 13). */
+.cut-region:focus-visible {
+  outline: 2px solid var(--cc-color-ember-500);
+  outline-offset: 2px;
+}
+
+/* Plex Mono numbering (DESIGN.md 7/4.1). */
+.cut-region-number {
+  font-family: var(--cc-font-data), monospace;
+  font-weight: var(--cc-weight-subhead);
+  font-size: var(--cc-type-size-2);
+  color: var(--cc-color-char-900);
+}
+
+/* Region placement over the line art (percentages of the diagram box). */
+.cut-region[data-cut='shoulder'] {
+  left: 22%;
+  top: 42%;
+}
+
+.cut-region[data-cut='ribs'] {
+  left: 40%;
+  top: 42%;
+}
+
+.cut-region[data-cut='brisket'] {
+  left: 24%;
+  top: 62%;
+}
+
+/* prefers-reduced-motion: nothing animates here by design; the hover/focus
+ * treatments are instantaneous state changes, not reveals (DESIGN.md 13). */

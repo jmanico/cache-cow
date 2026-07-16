@@ -92,6 +92,18 @@ public static class CompositionServiceCollectionExtensions
             new GuestOrderCapabilityTokenValidatorAdapter(
                 provider.GetRequiredService<GuestAccessTokenService>()));
 
+        // ---- SEO surfaces (CC-MKT-003 sitemap/feed/structured-data, CC-I18N-004)
+        // The composer is a pure function of the REAL gating service plus
+        // catalog/price data (ARCHITECTURE.md, Dependency rule 1: sitemap and
+        // feed generation are named dependents of the enforcement point).
+        // SeoOptions is bound but deliberately NOT ValidateOnStart: the
+        // required base URL is an open decision (ARCHITECTURE.md, "Known
+        // unknowns"), so the unconfigured host boots and the SEO endpoints
+        // fail closed per request — the same discipline as the money paths
+        // above, rather than blocking every other surface at startup.
+        services.AddOptions<Seo.SeoOptions>().BindConfiguration(Seo.SeoOptions.SectionName);
+        services.AddSingleton<Seo.SeoSurfaceComposer>();
+
         // ---- Fail-closed defaults for later-issue adapters -----------------
         // TryAdd so tests and the eventual real adapters replace them; every
         // default throws (denial), never a permissive stub.

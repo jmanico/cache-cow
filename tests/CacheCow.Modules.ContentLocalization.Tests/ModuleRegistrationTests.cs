@@ -1,3 +1,4 @@
+using CacheCow.Modules.ContentLocalization.Contact;
 using CacheCow.Modules.ContentLocalization.Email;
 using CacheCow.Modules.ContentLocalization.Rendering;
 using CacheCow.Modules.ContentLocalization.Resources;
@@ -34,6 +35,7 @@ public sealed class ModuleRegistrationTests
         Assert.NotNull(provider.GetRequiredService<OrderEmailComposer>());
         Assert.NotNull(provider.GetRequiredService<OrderEmailService>());
         Assert.IsType<InMemoryEmailDispatch>(provider.GetRequiredService<IEmailDispatch>());
+        Assert.IsType<UnconfiguredAbuseChallengeVerifier>(provider.GetRequiredService<IAbuseChallengeVerifier>());
     }
 
     [Fact]
@@ -63,7 +65,7 @@ public sealed class ModuleRegistrationTests
 
     private sealed class FakeDispatch : IEmailDispatch
     {
-        public Task DispatchAsync(ComposedOrderEmail email, string recipientEmailAddress, CancellationToken cancellationToken) =>
+        public Task DispatchAsync(ComposedEmail email, string recipientEmailAddress, CancellationToken cancellationToken) =>
             Task.CompletedTask;
     }
 }

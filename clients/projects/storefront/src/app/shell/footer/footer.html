@@ -2,6 +2,26 @@
   <div class="footer-inner">
     <p class="wordmark">{{ i18n.t('shell.footer.wordmark') }}</p>
     <p class="tagline">{{ i18n.t('shell.footer.tagline') }}</p>
+
+    @if (docs(); as docs) {
+      <!-- The transacting market's legal content set (CC-CNT-005), rendered
+           exactly as the server resolved it: in DE that includes Impressum
+           and Widerrufsbelehrung as first-class items in this same list
+           (DESIGN.md §8.4); elsewhere they are simply not in the set. No
+           market conditional here. -->
+      <nav class="legal-nav" data-testid="legal-nav" [attr.aria-label]="i18n.t('shell.footer.legalLabel')">
+        <ul class="legal-list">
+          @for (doc of docs.docs; track doc.id) {
+            <li class="legal-item">
+              <a class="legal-link" [attr.data-legal-doc]="doc.id" [routerLink]="['/legal', doc.id]">
+                {{ doc.title }}
+              </a>
+            </li>
+          }
+        </ul>
+      </nav>
+    }
+
     <p class="legal">{{ i18n.t('shell.footer.legal', { year: year }) }}</p>
   </div>
 </footer>

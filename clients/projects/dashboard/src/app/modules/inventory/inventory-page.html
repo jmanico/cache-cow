@@ -1,0 +1,85 @@
+<h1 class="page-title">{{ i18n.t('module.inventory.name') }}</h1>
+
+<!-- Keyboard-first filtering (DESIGN.md §12): labeled native controls only. -->
+<form class="cc-filters" [attr.aria-label]="i18n.t('inventory.filter.legend')" (submit)="$event.preventDefault()">
+  <label>
+    {{ i18n.t('inventory.filter.market') }}
+    <select data-testid="filter-market" (change)="setFrom($event.target, 'market')">
+      <option value="">{{ i18n.t('inventory.filter.any') }}</option>
+      @for (m of markets; track m) {
+        <option [value]="m" [selected]="m === market()">{{ m }}</option>
+      }
+    </select>
+  </label>
+  <label>
+    {{ i18n.t('inventory.filter.store') }}
+    <select data-testid="filter-store" (change)="setFrom($event.target, 'storeId')">
+      <option value="">{{ i18n.t('inventory.filter.any') }}</option>
+      @for (store of storeOptions(); track store.storeId) {
+        <option [value]="store.storeId" [selected]="store.storeId === storeId()">
+          {{ store.storeName }}
+        </option>
+      }
+    </select>
+  </label>
+  <label>
+    {{ i18n.t('inventory.col.sku') }}
+    <input
+      type="text"
+      class="cc-mono"
+      data-testid="filter-sku"
+      [value]="sku()"
+      (input)="setFrom($event.target, 'sku')"
+    />
+  </label>
+</form>
+
+@if (loadError()) {
+  <p class="cc-status-alert" role="alert" data-testid="load-error">{{ i18n.t('common.loadError') }}</p>
+} @else if (rows().length === 0) {
+  <p data-testid="inventory-empty">{{ i18n.t('inventory.empty') }}</p>
+} @else {
+  <div class="table-scroll">
+    <!--
+      Compact table per DESIGN.md §12: 40px rows and sticky header from
+      .cc-table, numerals right-aligned in Plex Mono via .cc-num, and units
+      live in the column headers ("On hand (units)", "Hit rate (%)"), never
+      in the cells.
+    -->
+    <table class="cc-table" data-testid="inventory-table">
+      <thead>
+        <tr>
+          <th scope="col">{{ i18n.t('inventory.col.store') }}</th>
+          <th scope="col">{{ i18n.t('inventory.col.market') }}</th>
+          <th scope="col">{{ i18n.t('inventory.col.sku') }}</th>
+          <th scope="col">{{ i18n.t('inventory.col.product') }}</th>
+          <th scope="col" class="cc-num">{{ i18n.t('inventory.col.onHand') }}</th>
+          <th scope="col">{{ i18n.t('inventory.col.state') }}</th>
+          <th scope="col" class="cc-num">{{ i18n.t('inventory.col.hitRate') }}</th>
+        </tr>
+      </thead>
+      <!-- Roving tabindex + arrow keys (core/row-nav.ts). Read-only: rows
+           carry no activation, only navigation. -->
+      <tbody appRowNav>
+        @for (row of rows(); track row.storeId + '/' + row.sku) {
+          <tr [attr.data-testid]="'inventory-row-' + row.storeId + '-' + row.sku">
+            <td>{{ row.storeName }}</td>
+            <td>{{ row.market }}</td>
+            <td class="cc-mono">{{ row.sku }}</td>
+            <td>{{ row.productName }}</td>
+            <td class="cc-num">{{ row.onHandUnits }}</td>
+            <td>
+              <!-- Badge ALWAYS paired with the plain line: status is never
+                   conveyed by color alone (DESIGN.md §§5.2, 13). -->
+              <span class="cc-badge" [class]="accent(row.availability)">{{ badge(row.availability) }}</span>
+              <span class="availability-plain">{{ plain(row.availability) }}</span>
+            </td>
+            <td class="cc-num" [attr.data-testid]="'hit-rate-' + row.storeId + '-' + row.sku">
+              {{ hitRate(row.serviceLevelBasisPoints) }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

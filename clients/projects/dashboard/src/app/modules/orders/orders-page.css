@@ -1,0 +1,44 @@
+/*
+ * Order module layout (issue 082; DESIGN.md §12 — compact staff density).
+ * Brand color/type resolve ONLY from the generated design tokens; the
+ * shared table/filter/badge utilities live in styles.css so all three
+ * module pages render one language (ARCHITECTURE.md, Dependency rule 8).
+ */
+
+.page-title {
+  font-size: var(--cc-type-size-3);
+  font-weight: var(--cc-weight-subhead);
+  margin: 0 0 16px;
+}
+
+/* Sticky headers need a scroll container to stick within (DESIGN.md §12). */
+.table-scroll {
+  max-height: 60vh;
+  overflow: auto;
+}
+
+.order-detail {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--cc-color-smoke-400);
+}
+
+.order-detail-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.order-detail-header h2 {
+  font-size: var(--cc-type-size-2);
+  font-weight: var(--cc-weight-subhead);
+  margin: 0;
+}
+
+.order-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}

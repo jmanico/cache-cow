@@ -1,0 +1,112 @@
+/* Store locator on the 12-column/1200px grid (DESIGN.md 6). Tokens only.
+ * List only — no map styling exists here because no map ships (issue 078). */
+.stores {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 32px 24px 64px;
+}
+
+.stores-title {
+  margin: 0 0 12px;
+  font-family: var(--cc-font-display), serif;
+  font-weight: var(--cc-weight-body);
+  font-size: var(--cc-type-size-6);
+  line-height: 1.15;
+  color: var(--cc-color-char-900);
+  overflow-wrap: break-word;
+}
+
+/* ja-JP / hi-IN display treatment (DESIGN.md 4.2). */
+:lang(ja) .stores-title {
+  font-family: var(--cc-font-display-ja-jp), sans-serif;
+  font-weight: var(--cc-weight-display-ja-jp);
+  border-bottom: 6px solid var(--cc-color-ember-500);
+  padding-bottom: 8px;
+  display: inline-block;
+}
+
+:lang(hi) .stores-title {
+  font-family: var(--cc-font-display-hi-in), sans-serif;
+  font-weight: var(--cc-weight-display-hi-in);
+  border-bottom: 6px solid var(--cc-color-ember-500);
+  padding-bottom: 8px;
+  display: inline-block;
+}
+
+.stores-lede {
+  margin: 0 0 32px;
+  max-width: 60ch;
+  color: var(--cc-color-bark-700);
+  overflow-wrap: break-word;
+}
+
+.stores-message {
+  margin: 0;
+  color: var(--cc-color-bark-700);
+}
+
+.stores-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+/* Partner card: Butcher card on Paper, 12px radius, 1px Smoke border. */
+.stores-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  background: var(--cc-color-butcher-300);
+  border: 1px solid var(--cc-color-smoke-400);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgb(34 24 18 / 8%);
+}
+
+.store-retailer {
+  margin: 0;
+  font-family: var(--cc-font-body), sans-serif;
+  font-weight: var(--cc-weight-subhead);
+  font-size: var(--cc-type-size-2);
+  color: var(--cc-color-char-900);
+  overflow-wrap: break-word;
+}
+
+/* Address is tabular data (DESIGN.md 4.1 data role): Plex Mono. */
+.store-address {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-family: var(--cc-font-data), monospace;
+  font-size: 0.9em;
+  font-style: normal;
+  color: var(--cc-color-bark-700);
+}
+
+.store-address-line,
+.store-locality {
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 1024px) {
+  .stores-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .stores {
+    padding: 24px 16px 48px;
+  }
+  .stores-title {
+    font-size: var(--cc-type-size-5);
+  }
+  .stores-list {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}

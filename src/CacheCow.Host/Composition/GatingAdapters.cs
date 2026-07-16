@@ -35,17 +35,24 @@ internal static class SkuGating
             return false;
         }
 
-        var classification = sku.Classification switch
+        var context = new TransactingContext(market, CarrierLocaleFor(market));
+        return gating
+            .EvaluateSku(context, new SkuGatingSubject(skuId, Classify(sku.Classification)), surface)
+            .IsAllowed;
+    }
+
+    /// <summary>
+    /// Maps the Catalog context's classification onto the gating subject's
+    /// (contexts do not share domain types beyond the kernel, ARCHITECTURE.md
+    /// Dependency rule 9). Anything not explicitly vegetarian maps to the most
+    /// restrictive class (fail closed).
+    /// </summary>
+    internal static SkuClassification Classify(ProductClassification classification) =>
+        classification switch
         {
             ProductClassification.Vegetarian => SkuClassification.Vegetarian,
             _ => SkuClassification.NonVegetarian, // most restrictive (fail closed)
         };
-
-        var context = new TransactingContext(market, CarrierLocaleFor(market));
-        return gating
-            .EvaluateSku(context, new SkuGatingSubject(skuId, classification), surface)
-            .IsAllowed;
-    }
 
     /// <summary>
     /// <see cref="TransactingContext"/> is valid only with a launch locale,

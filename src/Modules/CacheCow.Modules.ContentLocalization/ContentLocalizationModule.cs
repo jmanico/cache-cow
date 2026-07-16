@@ -1,3 +1,4 @@
+using CacheCow.Modules.ContentLocalization.Contact;
 using CacheCow.Modules.ContentLocalization.Email;
 using CacheCow.Modules.ContentLocalization.Rendering;
 using CacheCow.Modules.ContentLocalization.Resources;
@@ -52,6 +53,16 @@ public static class ContentLocalizationModule
         services.TryAddSingleton<IEmailDispatch>(static provider =>
             provider.GetRequiredService<InMemoryEmailDispatch>());
         services.TryAddSingleton<OrderEmailService>();
+
+        // --- Issue 076: contact form (CC-CNT-004; SECURITY.md, Input
+        // validation rule 10). The CAPTCHA-equivalent mechanism is an open
+        // decision, so the default verifier denies every submission (fail
+        // closed, host-replaceable). ContactFormOptions is deliberately NOT
+        // registered: the internal recipient and fill-time threshold are host
+        // configuration; without them the endpoint answers 503. The HOST maps
+        // the route via ContactEndpoints.MapContactEndpoints and registers
+        // the "contact-form" rate-limiter policy (issue 019).
+        services.TryAddSingleton<IAbuseChallengeVerifier, UnconfiguredAbuseChallengeVerifier>();
 
         return services;
     }

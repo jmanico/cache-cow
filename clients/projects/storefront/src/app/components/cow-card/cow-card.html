@@ -1,0 +1,61 @@
+<!--
+  Cow card (DESIGN.md §7). Mascot illustration + name + role + one-line bio.
+  Contains NO product link in any market (CC-CNT-002) and no butchery content
+  (§8.1 separation rule). All text is typed plain text through interpolation —
+  no raw-HTML sink (CC-SEC-002).
+-->
+<article class="cow-card" data-testid="cow-card" [attr.data-cow]="cow().id" [attr.data-blaze]="cow().blaze">
+  <!-- PLACEHOLDER mascot illustration: flat Char shapes on Butcher in the
+       logo's geometric style (DESIGN.md §7); the real seven-illustration set
+       is an open asset decision (§15). Static inline SVG (not [innerHTML]),
+       colours from tokens. role="img" + aria-label carries the blaze
+       differentiator to assistive technology (§13). -->
+  <svg
+    class="cow-illustration"
+    data-testid="cow-illustration"
+    viewBox="0 0 120 120"
+    width="120"
+    height="120"
+    role="img"
+    [attr.aria-label]="illustrationAlt()"
+  >
+    <!-- Geometric cow head: flat shapes, no gradients (DESIGN.md §2.3). -->
+    <path class="cow-ear" d="M18 44 L38 34 L38 56 Z" />
+    <path class="cow-ear" d="M102 44 L82 34 L82 56 Z" />
+    <rect class="cow-head" x="30" y="30" width="60" height="66" rx="10" />
+    <rect class="cow-muzzle" x="42" y="72" width="36" height="20" rx="8" />
+    <circle class="cow-eye" cx="46" cy="58" r="4" />
+    <circle class="cow-eye" cx="74" cy="58" r="4" />
+
+    <!-- The blaze is the differentiator (DESIGN.md §7). -->
+    @switch (cow().blaze) {
+      @case ('database') {
+        <!-- Stacked-disk database cylinder, as on the logo mark (§2.1). -->
+        <g class="cow-blaze" data-testid="blaze-database">
+          <ellipse class="blaze-shape" cx="60" cy="40" rx="11" ry="4" />
+          <rect class="blaze-shape" x="49" y="40" width="22" height="12" />
+          <ellipse class="blaze-shape" cx="60" cy="52" rx="11" ry="4" />
+        </g>
+      }
+      @case ('lightning') {
+        <g class="cow-blaze" data-testid="blaze-lightning">
+          <path class="blaze-shape" d="M63 34 L51 50 L59 50 L57 62 L69 46 L61 46 Z" />
+        </g>
+      }
+      @case ('heart') {
+        <g class="cow-blaze" data-testid="blaze-heart">
+          <path class="blaze-shape" d="M60 60 C48 50 48 38 55 38 C58 38 60 41 60 43 C60 41 62 38 65 38 C72 38 72 50 60 60 Z" />
+        </g>
+      }
+    }
+  </svg>
+
+  <h2 class="cow-name" data-testid="cow-name">{{ cow().name }}</h2>
+
+  <p class="cow-role">
+    <span class="cow-field-label">{{ i18n.t('cows.roleLabel') }}</span>
+    <span class="cow-role-text" data-testid="cow-role">{{ cow().role }}</span>
+  </p>
+
+  <p class="cow-bio" data-testid="cow-bio">{{ cow().bio }}</p>
+</article>

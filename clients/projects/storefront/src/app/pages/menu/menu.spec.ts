@@ -6,7 +6,9 @@
 
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { throwError } from 'rxjs';
+import { routes } from '../../app.routes';
 import { CatalogApi } from '../../catalog/catalog.api';
 import { TransactingContext } from '../../core/transacting-context';
 import { Menu } from './menu';
@@ -128,6 +130,32 @@ describe('Menu (issue 066)', () => {
     ).map((option) => option.value);
     expect(options).not.toContain('brisket');
     expect(options).toContain('paneer');
+  });
+
+  it('seeds the cut filter from the ?cut= query param the Cuts diagram links with (issue 075, CC-CNT-003)', async () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [provideRouter(routes)] });
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/menu?cut=ribs', Menu);
+    await harness.fixture.whenStable();
+    const host = harness.routeNativeElement as HTMLElement;
+
+    // The seam ran the filter server-side; the control reflects the state.
+    expect(skus(host)).toEqual(['ribs-st-louis']);
+    expect(host.querySelector<HTMLSelectElement>('[data-testid="cut-filter"]')?.value).toBe('ribs');
+  });
+
+  it('ignores an unrecognized ?cut= value rather than forwarding it (untrusted input)', async () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [provideRouter(routes)] });
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/menu?cut=../../etc/passwd', Menu);
+    await harness.fixture.whenStable();
+    const host = harness.routeNativeElement as HTMLElement;
+
+    // No filter applied; the full gated listing renders.
+    expect(skus(host).length).toBe(7);
+    expect(host.querySelector<HTMLSelectElement>('[data-testid="cut-filter"]')?.value).toBe('');
   });
 
   it('fails closed to a generic error state when the seam rejects the response (Failure Behavior)', async () => {

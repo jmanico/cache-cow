@@ -9,6 +9,10 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="xunit.runner.visualstudio" />
+    <!-- In-module TestServer for the dashboard endpoint suites (issues
+         082/084/085). Centrally pinned, already used by the other module test
+         projects (SECURITY.md, Dependency Rules 7). -->
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Modules\CacheCow.Modules.BackOffice\CacheCow.Modules.BackOffice.csproj" />

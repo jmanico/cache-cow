@@ -38,6 +38,37 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server,
   },
   {
+    // Shared roster, bios localized per request (CC-CNT-001).
+    path: 'chefs',
+    renderMode: RenderMode.Server,
+  },
+  {
+    // Nav placement differs per market (CC-MKT-005), so the response varies
+    // by transacting market: per-request render, never a prerendered variant.
+    path: 'cows',
+    renderMode: RenderMode.Server,
+  },
+  {
+    // Gated experience (CC-MKT-005): the IN market must receive HTTP 404 —
+    // not 403, not a redirect. That STATUS is owned by the server gating API
+    // (issues 025/026); until it lands, the IN request renders the 404 page
+    // body with a 200 status. The status gap is server-side work, tracked
+    // there — see pages/cuts/cuts.ts.
+    path: 'cuts',
+    renderMode: RenderMode.Server,
+  },
+  {
+    // Market-filtered partner list (issue 078 AC-01/AC-05).
+    path: 'stores',
+    renderMode: RenderMode.Server,
+  },
+  {
+    // Per-market, per-locale legal content set (CC-CNT-005): any cacheable
+    // variant keys on server-side transacting market + locale (CC-MKT-009).
+    path: 'legal/:doc',
+    renderMode: RenderMode.Server,
+  },
+  {
     path: '**',
     renderMode: RenderMode.Server,
     status: 404,
