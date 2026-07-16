@@ -1,0 +1,56 @@
+<section class="menu">
+  <h1 class="menu-title">{{ i18n.t('menu.title') }}</h1>
+
+  @switch (state().kind) {
+    @case ('loading') {
+      <p class="menu-message" data-testid="menu-loading">{{ i18n.t('menu.loading') }}</p>
+    }
+    @case ('error') {
+      <!-- Generic error, what happened and what to do next (DESIGN.md 9);
+           no raw error bodies (SECURITY.md, Logging rules 1/7). -->
+      <p class="menu-message" data-testid="menu-error">{{ i18n.t('menu.error') }}</p>
+    }
+    @case ('ready') {
+      @if (listing(); as listing) {
+        <form class="menu-filters" [attr.aria-label]="i18n.t('menu.filters.label')">
+          <label class="menu-filter">
+            <span class="menu-filter-label">{{ i18n.t('menu.filter.cut') }}</span>
+            <select class="menu-filter-select" data-testid="cut-filter" (change)="onCutChange($event)">
+              <option value="" [selected]="activeCut() === null">
+                {{ i18n.t('menu.filter.cut.all') }}
+              </option>
+              @for (cut of listing.cuts; track cut) {
+                <option [value]="cut" [selected]="cut === activeCut()">
+                  {{ i18n.t(cutNameKey(cut)) }}
+                </option>
+              }
+            </select>
+          </label>
+          <!-- Single-toggle vegetarian filter, all markets (CC-CAT-006). -->
+          <label class="menu-filter menu-filter-veg">
+            <input
+              type="checkbox"
+              class="menu-filter-toggle"
+              data-testid="veg-filter"
+              [checked]="vegOnly()"
+              (change)="onVegToggle($event)"
+            />
+            <span class="menu-filter-label">{{ i18n.t('menu.filter.vegOnly') }}</span>
+          </label>
+        </form>
+
+        @if (listing.products.length === 0) {
+          <p class="menu-message" data-testid="menu-empty">{{ i18n.t('menu.empty') }}</p>
+        } @else {
+          <ul class="menu-grid" data-testid="menu-grid">
+            @for (product of listing.products; track product.sku) {
+              <li class="menu-cell">
+                <app-product-card [product]="product" />
+              </li>
+            }
+          </ul>
+        }
+      }
+    }
+  }
+</section>

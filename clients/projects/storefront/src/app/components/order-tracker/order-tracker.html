@@ -1,0 +1,47 @@
+<div class="tracker">
+  <p class="tracker-order">
+    <span class="tracker-order-label">{{ i18n.t('track.orderNumberLabel') }}</span>
+    <span class="tracker-order-number" data-testid="order-number">{{ tracking().orderNumber }}</span>
+  </p>
+
+  <!-- Broadcast arc fan (DESIGN.md 5.1): progress arcs fill in Ember as the
+       order advances. Decorative only — the list below carries the status as
+       text (never color alone, DESIGN.md 13). Static inline SVG. -->
+  <svg
+    class="tracker-arcs"
+    [class.tracker-animate]="animate"
+    data-testid="tracker-arcs"
+    viewBox="0 0 100 64"
+    width="160"
+    height="102"
+    aria-hidden="true"
+    focusable="false"
+  >
+    @for (entry of tracking().stages; track entry.stage; let index = $index) {
+      <path
+        [class]="entry.reachedAt !== null ? 'arc arc-reached' : 'arc arc-pending'"
+        [attr.d]="arcPath(index)"
+        pathLength="1"
+      />
+    }
+  </svg>
+
+  <ol class="tracker-stages" data-testid="tracker-stages">
+    @for (entry of tracking().stages; track entry.stage; let index = $index) {
+      <li
+        class="tracker-stage"
+        [class.tracker-stage-reached]="entry.reachedAt !== null"
+        [attr.aria-current]="index === reached() - 1 ? 'step' : null"
+      >
+        <span class="tracker-stage-label">{{ i18n.t(stageLabelKey(entry.stage)) }}</span>
+        @if (entry.reachedAt !== null) {
+          <time class="tracker-stage-time" [attr.datetime]="entry.reachedAt">
+            {{ timestampText(entry.reachedAt) }}
+          </time>
+        } @else {
+          <span class="tracker-stage-pending">{{ i18n.t('track.stageNotReached') }}</span>
+        }
+      </li>
+    }
+  </ol>
+</div>

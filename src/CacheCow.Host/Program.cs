@@ -1,3 +1,4 @@
+using CacheCow.Host.Composition;
 using CacheCow.Host.Security;
 using CacheCow.Host.TestSupport;
 using CacheCow.Modules.BackOffice;
@@ -10,6 +11,7 @@ using CacheCow.Modules.MarketGating;
 using CacheCow.Modules.OrderingPayments;
 using CacheCow.Modules.PricingPromotions;
 using CacheCow.Modules.WholesaleB2B;
+using CacheCow.Modules.WholesaleB2B.Api;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,13 @@ builder.Services
 // Issues 016-022: transport, headers, CORS/limits, rate limiting,
 // deny-by-default authorization, RFC 9457 errors, security-event logging.
 builder.Services.AddCacheCowSecurity();
+
+// Composition root: cross-module port adapters (audit, gating, money paths,
+// guest tokens) plus fail-closed defaults for later-issue adapters. AFTER the
+// module registrations so it replaces their provisional TryAdd defaults, and
+// after AddCacheCowSecurity (whose rate limiter registers the b2b-client and
+// order-creation policies the B2B API requires, CC-API-008).
+builder.Services.AddCacheCowComposition();
 
 // Kestrel transport-level body cap (SECURITY.md, HTTP boundary rule 7); the
 // in-pipeline RequestBodySizeLimitMiddleware applies the same configured cap
@@ -52,6 +61,16 @@ var app = builder.Build();
 // (issue 016): HTTPS/HSTS -> security headers -> static files ->
 // authentication -> authorization, with errors/status codes outermost.
 app.UseCacheCowSecurityPipeline();
+
+// The versioned /v1 B2B API (CC-API-001). Endpoints mapped here execute at
+// the END of the middleware pipeline composed above — i.e. after HTTPS,
+// security headers, authentication, the rate limiter, and authorization —
+// exactly where the WholesaleB2B host-wiring contract requires them
+// (SECURITY.md, HTTP boundary rule 5). JwtBearer for the B2B audience (Entra
+// ID, SECURITY.md Authentication rule 7) is a later issue: until it lands the
+// placeholder scheme authenticates nothing, so every /v1 request is denied by
+// the fallback policy (fail closed).
+app.MapWholesaleB2BApi();
 
 // Test-only sample endpoints; never enabled by shipped configuration.
 TestOnlyEndpoints.MapIfEnabled(app);

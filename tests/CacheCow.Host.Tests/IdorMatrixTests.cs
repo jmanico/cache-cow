@@ -11,6 +11,9 @@ namespace CacheCow.Host.Tests;
 /// (CC-QA-005). SecretMarker is content that MUST NOT appear in any
 /// out-of-scope response; ExpectedBody is what the rightful caller receives.
 /// RequiredRole/WrongRole apply only to role-gated routes.
+/// OwnerHeaders/ForeignHeaders let a suite attach extra authentication
+/// headers per caller (e.g. the B2B client-id/scope claims the /v1 surface
+/// requires) on top of the user/tenant/role trio.
 /// </summary>
 public sealed record ProtectedResourceRoute(
     string Name,
@@ -24,7 +27,9 @@ public sealed record ProtectedResourceRoute(
     string ForeignUser,
     string? ForeignTenant,
     string? RequiredRole = null,
-    string? WrongRole = null);
+    string? WrongRole = null,
+    IReadOnlyDictionary<string, string>? OwnerHeaders = null,
+    IReadOnlyDictionary<string, string>? ForeignHeaders = null);
 
 /// <summary>
 /// Issue 062 (CC-SEC-007, CC-QA-005; SECURITY.md, Authentication rules 8-9;
@@ -43,10 +48,20 @@ public sealed record ProtectedResourceRoute(
 /// </summary>
 public abstract class IdorMatrixTestBase : IDisposable
 {
-    private readonly WebApplicationFactory<Program> _factory = TestHostBuilder.Create();
+    private WebApplicationFactory<Program>? _factory;
+
+    private WebApplicationFactory<Program> Factory => _factory ??= CreateFactory();
 
     /// <summary>The protected resource routes under attack.</summary>
     protected abstract IReadOnlyList<ProtectedResourceRoute> Routes { get; }
+
+    /// <summary>
+    /// The host under attack. Module suites override to seed the resources
+    /// their routes address (fake tenants, orders, invoices) — the harness
+    /// itself stays unchanged (issue 062: real module endpoints plug their
+    /// routes into the same harness as they land).
+    /// </summary>
+    protected virtual WebApplicationFactory<Program> CreateFactory() => TestHostBuilder.Create();
 
     public void Dispose()
     {
@@ -58,7 +73,7 @@ public abstract class IdorMatrixTestBase : IDisposable
     {
         if (disposing)
         {
-            _factory.Dispose();
+            _factory?.Dispose();
         }
     }
 
@@ -70,7 +85,7 @@ public abstract class IdorMatrixTestBase : IDisposable
         Assert.NotEmpty(Routes);
         foreach (var route in Routes)
         {
-            using var client = CreateClient(user: null, tenant: null, role: null);
+            using var client = CreateClient(user: null, tenant: null, role: null, headers: null);
             using var response = await Send(client, route.Method, route.Path);
             Assert.True(
                 response.StatusCode == HttpStatusCode.Unauthorized,
@@ -87,7 +102,7 @@ public abstract class IdorMatrixTestBase : IDisposable
         foreach (var route in Routes)
         {
             // Only tenancy is wrong: the attacker holds any required role.
-            using var client = CreateClient(route.ForeignUser, route.ForeignTenant, route.RequiredRole);
+            using var client = CreateClient(route.ForeignUser, route.ForeignTenant, route.RequiredRole, route.ForeignHeaders);
             using var response = await Send(client, route.Method, route.Path);
             var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
@@ -106,7 +121,7 @@ public abstract class IdorMatrixTestBase : IDisposable
         foreach (var route in Routes.Where(r => r.RequiredRole is not null))
         {
             // Right tenant, insufficient role (CC-DSH-002 matrix posture).
-            using var client = CreateClient(route.OwnerUser, route.OwnerTenant, route.WrongRole);
+            using var client = CreateClient(route.OwnerUser, route.OwnerTenant, route.WrongRole, route.OwnerHeaders);
             using var response = await Send(client, route.Method, route.Path);
             var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
@@ -125,7 +140,7 @@ public abstract class IdorMatrixTestBase : IDisposable
         Assert.NotEmpty(Routes);
         foreach (var route in Routes)
         {
-            using var client = CreateClient(route.OwnerUser, route.OwnerTenant, route.RequiredRole);
+            using var client = CreateClient(route.OwnerUser, route.OwnerTenant, route.RequiredRole, route.OwnerHeaders);
             using var response = await Send(client, route.Method, route.Path);
             var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
@@ -144,7 +159,7 @@ public abstract class IdorMatrixTestBase : IDisposable
         Assert.NotEmpty(Routes);
         foreach (var route in Routes)
         {
-            using var foreign = CreateClient(route.ForeignUser, route.ForeignTenant, route.RequiredRole);
+            using var foreign = CreateClient(route.ForeignUser, route.ForeignTenant, route.RequiredRole, route.ForeignHeaders);
             using var deniedResponse = await Send(foreign, route.Method, route.Path);
             using var missingResponse = await Send(foreign, route.Method, route.NonexistentPath);
             var denied = await deniedResponse.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
@@ -181,9 +196,9 @@ public abstract class IdorMatrixTestBase : IDisposable
         }
     }
 
-    private HttpClient CreateClient(string? user, string? tenant, string? role)
+    private HttpClient CreateClient(string? user, string? tenant, string? role, IReadOnlyDictionary<string, string>? headers)
     {
-        var client = _factory.CreateHttpsClient();
+        var client = Factory.CreateHttpsClient();
         if (user is not null)
         {
             client.DefaultRequestHeaders.Add(TestAuthHandler.UserHeader, user);
@@ -197,6 +212,14 @@ public abstract class IdorMatrixTestBase : IDisposable
         if (role is not null)
         {
             client.DefaultRequestHeaders.Add(TestAuthHandler.RolesHeader, role);
+        }
+
+        if (headers is not null)
+        {
+            foreach (var (name, value) in headers)
+            {
+                client.DefaultRequestHeaders.Add(name, value);
+            }
         }
 
         return client;

@@ -1,0 +1,114 @@
+/* Product card (DESIGN.md 6/7): Butcher card on Paper page, 12px radius,
+ * 1px Smoke border, light shadow only. Tokens only (Dependency rule 8).
+ * Stretched-link pattern: .card-link::after covers the card so the whole
+ * card is one link; the action button layers above it (DESIGN.md 7). */
+.product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--cc-color-butcher-300);
+  border: 1px solid var(--cc-color-smoke-400);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgb(34 24 18 / 8%);
+}
+
+/* 4:5 photo placeholder (DESIGN.md 7). */
+.card-media {
+  aspect-ratio: 4 / 5;
+  border-radius: 8px;
+  background: var(--cc-color-paper-100);
+  border: 1px solid var(--cc-color-smoke-400);
+}
+
+/* Name: Archivo 700 (DESIGN.md 7, 4.1 subheads). */
+.card-name {
+  margin: 0;
+  font-family: var(--cc-font-body), sans-serif;
+  font-weight: var(--cc-weight-subhead);
+  font-size: var(--cc-type-size-2);
+  overflow-wrap: break-word; /* 130% expansion budget (CC-I18N-005) */
+}
+
+.card-link {
+  color: var(--cc-color-char-900);
+  text-decoration: none;
+}
+
+.card-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+}
+
+.card-link:focus-visible {
+  outline: none;
+}
+
+/* Visible focus on the whole card when the link is focused (DESIGN.md 13). */
+.card-link:focus-visible::after {
+  outline: 2px solid var(--cc-color-ember-500);
+  outline-offset: 2px;
+}
+
+/* Cut/weight and price data in Plex Mono, one step below body (DESIGN.md 4.1/4.3). */
+.card-meta {
+  margin: 0;
+  font-family: var(--cc-font-data), monospace;
+  font-size: 0.9em;
+  color: var(--cc-color-bark-700);
+  overflow-wrap: break-word;
+}
+
+.card-price {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.price-amount {
+  font-family: var(--cc-font-data), monospace;
+  font-weight: var(--cc-weight-subhead);
+}
+
+.price-tax-note {
+  font-size: 0.8em;
+  color: var(--cc-color-bark-700);
+}
+
+.card-unit-price {
+  margin: 0;
+  font-family: var(--cc-font-data), monospace;
+  font-size: 0.8em;
+  color: var(--cc-color-bark-700);
+}
+
+/* Add-to-cart / preorder: separate action layered above the stretched link. */
+.card-action {
+  position: relative;
+  z-index: 1;
+  align-self: flex-start;
+  font-family: inherit;
+  font-size: var(--cc-type-size-1);
+  font-weight: var(--cc-weight-ui-label);
+  color: var(--cc-color-paper-100);
+  background: var(--cc-color-ember-500);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.card-action:hover,
+.card-action:active {
+  background: var(--cc-color-ember-700);
+}
+
+.card-action:focus-visible {
+  outline: 2px solid var(--cc-color-ember-500);
+  outline-offset: 2px;
+}

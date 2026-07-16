@@ -114,6 +114,15 @@ internal static class TestHostBuilder
 /// Optional X-Test-Tenant and X-Test-Roles (comma-separated) headers supply
 /// the tenant claim and roles the object-level authorization suite scopes by
 /// (issue 062).
+///
+/// Optional B2B claim headers let the composition suite exercise the real
+/// /v1 pipeline (issue 054's claim policy in B2BTokenClaimsValidator):
+/// X-Test-Client-Id maps to the "client_id" claim, X-Test-Scopes to "scp"
+/// (space-separated). When a client id is present the handler also stamps
+/// iat/exp for a 5-minute-old-to-valid window (within the CC-API-003 15-minute
+/// ceiling) and — unless X-Test-Bearer-Only is set — an mTLS "cnf"
+/// confirmation claim, so write scopes stay effective (bearer-only tokens are
+/// ceilinged to read-only per CC-API-003).
 /// </summary>
 internal sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
@@ -121,6 +130,9 @@ internal sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSche
     public const string UserHeader = "X-Test-User";
     public const string TenantHeader = "X-Test-Tenant";
     public const string RolesHeader = "X-Test-Roles";
+    public const string ClientIdHeader = "X-Test-Client-Id";
+    public const string ScopesHeader = "X-Test-Scopes";
+    public const string BearerOnlyHeader = "X-Test-Bearer-Only";
 
     public TestAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -154,6 +166,25 @@ internal sealed class TestAuthHandler : AuthenticationHandler<AuthenticationSche
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
+        }
+
+        if (Request.Headers.TryGetValue(ClientIdHeader, out var clientId) && !StringValues.IsNullOrEmpty(clientId))
+        {
+            claims.Add(new Claim("client_id", clientId.ToString()));
+
+            var now = DateTimeOffset.UtcNow;
+            claims.Add(new Claim("iat", now.AddMinutes(-5).ToUnixTimeSeconds().ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            claims.Add(new Claim("exp", now.AddMinutes(5).ToUnixTimeSeconds().ToString(System.Globalization.CultureInfo.InvariantCulture)));
+
+            if (!Request.Headers.ContainsKey(BearerOnlyHeader))
+            {
+                claims.Add(new Claim("cnf", /*lang=json,strict*/ """{"x5t#S256":"test-thumbprint"}"""));
+            }
+        }
+
+        if (Request.Headers.TryGetValue(ScopesHeader, out var scopes) && !StringValues.IsNullOrEmpty(scopes))
+        {
+            claims.Add(new Claim("scp", scopes.ToString()));
         }
 
         var identity = new ClaimsIdentity(claims, Scheme);

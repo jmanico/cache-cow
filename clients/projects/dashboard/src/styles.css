@@ -2,7 +2,8 @@
  * Global styles: brand colors/type resolve ONLY from generated design tokens
  * (tokens/dist/tokens.css, wired via angular.json "styles").
  * No hardcoded brand values in any client (ARCHITECTURE.md, Dependency rule 8).
- * Pit theme per DESIGN.md section 12: Pit background, Pitpaper text.
+ * Pit theme per DESIGN.md section 12: Pit background, Pitpaper text,
+ * cache-green good / Ember alert / Smoke neutral, Archivo UI, Plex Mono numbers.
  */
 body {
   margin: 0;
@@ -11,4 +12,101 @@ body {
   font-family: var(--cc-font-body), sans-serif;
   font-size: var(--cc-type-size-1);
   line-height: var(--cc-type-line-height-body);
+}
+
+/*
+ * Keyboard focus (DESIGN.md section 13): visible 2px Cache outline on Pit.
+ * Applies to every focusable element in the dashboard.
+ */
+:focus-visible {
+  outline: 2px solid var(--cc-color-cache-500);
+  outline-offset: 2px;
+}
+
+/* Skip link (DESIGN.md section 13): first focusable element in the shell. */
+.cc-skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 8px 16px;
+  background: var(--cc-color-pit-950);
+  color: var(--cc-color-cache-500);
+  text-decoration: underline;
+}
+
+.cc-skip-link:focus-visible {
+  left: 0;
+}
+
+/* Action buttons: Paper text on Ember fill (verified pair, DESIGN.md 3.2). */
+.cc-button {
+  font: inherit;
+  font-weight: var(--cc-weight-ui-label);
+  color: var(--cc-color-paper-100);
+  background: var(--cc-color-ember-500);
+  border: 0;
+  border-radius: 4px;
+  padding: 8px 24px;
+  cursor: pointer;
+}
+
+.cc-button:hover {
+  background: var(--cc-color-ember-700);
+}
+
+.cc-button-secondary {
+  background: transparent;
+  color: var(--cc-color-pitpaper-100);
+  border: 1px solid var(--cc-color-smoke-400);
+}
+
+.cc-button-secondary:hover {
+  background: transparent;
+  border-color: var(--cc-color-pitpaper-100);
+}
+
+/*
+ * Compact-density data-table utilities (DESIGN.md section 12), ready for the
+ * module pages (issues 082-087): 40px rows, sticky headers, right-aligned
+ * Plex Mono numerals, units in column headers not cells.
+ */
+.cc-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cc-table th,
+.cc-table td {
+  height: 40px;
+  padding: 0 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--cc-color-smoke-400);
+}
+
+.cc-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--cc-color-pit-950);
+  font-weight: var(--cc-weight-subhead);
+}
+
+/* Every number in Plex Mono, right-aligned in tables (DESIGN.md section 12). */
+.cc-num {
+  font-family: var(--cc-font-data), monospace;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Status accents: one accent family per meaning (DESIGN.md section 12). */
+.cc-status-good {
+  color: var(--cc-color-cache-500);
+}
+
+.cc-status-alert {
+  color: var(--cc-color-ember-500);
+}
+
+.cc-status-neutral {
+  color: var(--cc-color-smoke-400);
 }

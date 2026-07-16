@@ -1,0 +1,13 @@
+<!-- No login form by design: the button hands off to the SSO seam (issue 060). -->
+<main class="gate" id="cc-main" tabindex="-1">
+  <h1 class="gate-title">{{ i18n.t('gate.title') }}</h1>
+  <p class="gate-body">{{ i18n.t('gate.body') }}</p>
+  <button
+    type="button"
+    class="cc-button"
+    data-testid="sign-in-action"
+    (click)="beginSignIn()"
+  >
+    {{ i18n.t('gate.action') }}
+  </button>
+</main>

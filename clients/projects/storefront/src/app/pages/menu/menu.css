@@ -1,0 +1,122 @@
+/* Menu page layout on the 12-column/1200px grid (DESIGN.md 6). Tokens only. */
+.menu {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 32px 24px 64px;
+}
+
+.menu-title {
+  margin: 0 0 24px;
+  font-family: var(--cc-font-display), serif;
+  font-weight: var(--cc-weight-body);
+  font-size: var(--cc-type-size-6);
+  line-height: 1.15;
+  color: var(--cc-color-char-900);
+  overflow-wrap: break-word;
+}
+
+/* ja-JP / hi-IN display treatment: heavy weight + Ember slab bar substitute
+ * for the Latin slab serif (DESIGN.md 4.2), keyed off the document lang. */
+:lang(ja) .menu-title {
+  font-family: var(--cc-font-display-ja-jp), sans-serif;
+  font-weight: var(--cc-weight-display-ja-jp);
+  border-bottom: 6px solid var(--cc-color-ember-500);
+  padding-bottom: 8px;
+  display: inline-block;
+}
+
+:lang(hi) .menu-title {
+  font-family: var(--cc-font-display-hi-in), sans-serif;
+  font-weight: var(--cc-weight-display-hi-in);
+  border-bottom: 6px solid var(--cc-color-ember-500);
+  padding-bottom: 8px;
+  display: inline-block;
+}
+
+.menu-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 32px;
+  margin-bottom: 32px;
+}
+
+.menu-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.menu-filter-label {
+  font-weight: var(--cc-weight-ui-label);
+  color: var(--cc-color-bark-700);
+  overflow-wrap: break-word;
+}
+
+.menu-filter-select {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--cc-color-char-900);
+  background: var(--cc-color-paper-100);
+  border: 1px solid var(--cc-color-smoke-400);
+  border-radius: 4px;
+  padding: 4px 8px;
+  max-width: 100%;
+}
+
+.menu-filter-toggle {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--cc-color-cache-500);
+}
+
+.menu-filter-select:focus-visible,
+.menu-filter-toggle:focus-visible {
+  outline: 2px solid var(--cc-color-ember-500);
+  outline-offset: 2px;
+}
+
+.menu-message {
+  margin: 0;
+  color: var(--cc-color-bark-700);
+}
+
+/* Card grid: 12-col-derived responsive tracks (DESIGN.md 6). */
+.menu-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.menu-cell {
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .menu-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .menu-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .menu {
+    padding: 24px 16px 48px;
+  }
+  .menu-title {
+    font-size: var(--cc-type-size-5);
+  }
+  .menu-grid {
+    grid-template-columns: 1fr;
+  }
+}

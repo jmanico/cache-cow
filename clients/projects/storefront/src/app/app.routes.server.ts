@@ -19,6 +19,25 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server,
   },
   {
+    path: 'menu',
+    renderMode: RenderMode.Server,
+  },
+  {
+    // Per-request render: the gated product (and its 404-vs-render outcome)
+    // is per-market server state. The HTTP 404 status for a SKU absent from
+    // the transacting market's catalog is owned by the server gating API
+    // (CC-MKT-004, issues 025/026); until it lands, an unknown SKU renders
+    // the 404 page body here.
+    path: 'product/:sku',
+    renderMode: RenderMode.Server,
+  },
+  {
+    // Personalized response: never edge-cached, Cache-Control: no-store is
+    // server wiring (SECURITY.md, HTTP boundary rule 10; issue 028).
+    path: 'track',
+    renderMode: RenderMode.Server,
+  },
+  {
     path: '**',
     renderMode: RenderMode.Server,
     status: 404,

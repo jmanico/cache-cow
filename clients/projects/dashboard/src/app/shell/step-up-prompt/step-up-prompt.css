@@ -1,0 +1,21 @@
+.step-up {
+  max-width: 24rem;
+  padding: 24px;
+  border: 1px solid var(--cc-color-ember-500);
+  border-radius: 4px;
+}
+
+.step-up-title {
+  font-size: var(--cc-type-size-2);
+  font-weight: var(--cc-weight-subhead);
+  margin: 0 0 8px;
+}
+
+.step-up-body {
+  margin: 0 0 24px;
+}
+
+.step-up-actions {
+  display: flex;
+  gap: 12px;
+}

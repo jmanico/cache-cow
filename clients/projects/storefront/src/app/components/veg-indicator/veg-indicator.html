@@ -1,0 +1,43 @@
+<!-- Which case renders is server policy data (vegMarking), never a client
+     market conditional. 'none' renders nothing: no non-veg mark exists in
+     this client (CC-CNT-006). -->
+@switch (marking()) {
+  @case ('fssaiVeg') {
+    <!-- FSSAI vegetarian regulation mark (CC-CNT-006): green square outline,
+         filled green circle. Static inline SVG; the adjacent text keeps the
+         status shape-plus-label (DESIGN.md 13). -->
+    <span class="veg-indicator" data-testid="veg-indicator">
+      <svg
+        class="fssai-mark"
+        data-testid="fssai-mark"
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        role="img"
+        [attr.aria-label]="i18n.t('veg.fssaiMarkLabel')"
+      >
+        <rect class="fssai-square" x="1.5" y="1.5" width="21" height="21" />
+        <circle class="fssai-dot" cx="12" cy="12" r="6" />
+      </svg>
+      <span class="veg-word">{{ i18n.t('veg.vegetarian') }}</span>
+    </span>
+  }
+  @case ('leafDot') {
+    <!-- cache.500 leaf-dot badge + the word "Vegetarian" (DESIGN.md 3.3). -->
+    <span class="veg-indicator" data-testid="veg-indicator">
+      <svg
+        class="leaf-dot"
+        data-testid="leaf-dot"
+        viewBox="0 0 24 24"
+        width="18"
+        height="18"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <circle class="leaf-dot-circle" cx="12" cy="12" r="10" />
+        <path class="leaf-dot-leaf" d="M12 17c-1-4 1-8 5-9-0.5 4-2 8-5 9z" />
+      </svg>
+      <span class="veg-word">{{ i18n.t('veg.vegetarian') }}</span>
+    </span>
+  }
+}

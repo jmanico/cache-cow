@@ -1,0 +1,108 @@
+@switch (state().kind) {
+  @case ('loading') {
+    <section class="pdp">
+      <p class="pdp-message" data-testid="pdp-loading">{{ i18n.t('pdp.loading') }}</p>
+    </section>
+  }
+  @case ('error') {
+    <!-- Generic message only; no partial compliance-bearing content renders
+         on a failed/invalid response (fail closed, SECURITY.md rule 1). -->
+    <section class="pdp">
+      <p class="pdp-message" data-testid="pdp-error">{{ i18n.t('pdp.error') }}</p>
+    </section>
+  }
+  @case ('notFound') {
+    <!-- Unknown/ungated SKU: the 404 page. The HTTP 404 status itself is
+         server-owned (CC-MKT-004, issue 026). -->
+    <app-not-found data-testid="pdp-not-found" />
+  }
+  @case ('ready') {
+    @if (product(); as product) {
+      <article class="pdp">
+        <!-- Gallery placeholder: PDP gallery aspect/count rules are an open
+             question (issue 067); photography direction is DESIGN.md 8.6. -->
+        <div class="pdp-gallery" aria-hidden="true" data-testid="pdp-gallery"></div>
+
+        <div class="pdp-body">
+          <h1 class="pdp-name">{{ product.name }}</h1>
+
+          <p class="pdp-meta" data-testid="pdp-meta">
+            {{ i18n.t('card.cutWeight', { cut: i18n.t(cutKey(product)), weight: product.netWeightDisplay }) }}
+          </p>
+
+          <app-veg-indicator [marking]="product.vegMarking" />
+          <app-stock-badge [state]="product.stockState" />
+
+          <p class="pdp-price">
+            <span class="price-amount" data-testid="pdp-price">{{ priceText() }}</span>
+            <span class="price-tax-note" data-testid="pdp-tax-note">{{ i18n.t(taxNoteKey(product)) }}</span>
+          </p>
+          @if (product.price.unitPerKgMinor !== undefined) {
+            <!-- Unit price per kg alongside the price, Plex Mono (CC-PRC-002;
+                 DESIGN.md 8.4) — present iff the typed response carries it. -->
+            <p class="pdp-unit-price" data-testid="pdp-unit-price">
+              {{ i18n.t('price.perKg', { price: unitPerKgText(product) }) }}
+            </p>
+          }
+
+          <p class="pdp-serves" data-testid="pdp-serves">
+            {{ i18n.t('pdp.serves', { count: product.serves }) }}
+          </p>
+
+          <!-- Structured food data only from here down (CC-CAT-004): typed
+               fields, no CMS/free-text source, zero puns (DESIGN.md 5.4). -->
+          <section class="pdp-section" data-testid="pdp-ingredients">
+            <h2 class="pdp-section-title">{{ i18n.t('pdp.ingredients') }}</h2>
+            <ul class="pdp-list">
+              @for (ingredient of product.ingredients; track $index) {
+                <li>{{ ingredient }}</li>
+              }
+            </ul>
+          </section>
+
+          <section class="pdp-section" data-testid="pdp-allergens">
+            <h2 class="pdp-section-title">{{ i18n.t('pdp.allergens') }}</h2>
+            @if (product.allergens.length === 0) {
+              <p class="pdp-text" data-testid="pdp-allergens-none">{{ i18n.t('pdp.allergens.none') }}</p>
+            } @else {
+              <ul class="pdp-list" data-testid="pdp-allergens-list">
+                @for (allergen of product.allergens; track $index) {
+                  <li>{{ allergen }}</li>
+                }
+              </ul>
+            }
+          </section>
+
+          <section class="pdp-section" data-testid="pdp-nutrition">
+            <h2 class="pdp-section-title">{{ i18n.t('pdp.nutrition') }}</h2>
+            <!-- Placeholder table pending the per-market nutrition format
+                 (CC-CMP-004, issues 029/034); rows are structured fields. -->
+            <table class="pdp-table">
+              <tbody>
+                @for (row of product.nutrition; track $index) {
+                  <tr>
+                    <th scope="row">{{ row.label }}</th>
+                    <td class="pdp-table-value">{{ row.value }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </section>
+
+          <section class="pdp-section" data-testid="pdp-storage">
+            <h2 class="pdp-section-title">{{ i18n.t('pdp.storage') }}</h2>
+            <p class="pdp-text">{{ product.storage }}</p>
+          </section>
+
+          <section class="pdp-section" data-testid="pdp-reheat">
+            <h2 class="pdp-section-title">{{ i18n.t('pdp.reheat') }}</h2>
+            @for (instruction of product.reheat; track instruction.format) {
+              <h3 class="pdp-reheat-format">{{ i18n.t(reheatKey(instruction.format)) }}</h3>
+              <p class="pdp-text">{{ instruction.text }}</p>
+            }
+          </section>
+        </div>
+      </article>
+    }
+  }
+}

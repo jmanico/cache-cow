@@ -1,0 +1,31 @@
+/* Veg marking (DESIGN.md 3.3). The single system green, from tokens only
+ * (Dependency rule 8). Shape plus label, never color alone (DESIGN.md 13). */
+.veg-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fssai-mark .fssai-square {
+  fill: none;
+  stroke: var(--cc-color-cache-500);
+  stroke-width: 2;
+}
+
+.fssai-mark .fssai-dot {
+  fill: var(--cc-color-cache-500);
+}
+
+.leaf-dot .leaf-dot-circle {
+  fill: var(--cc-color-cache-500);
+}
+
+.leaf-dot .leaf-dot-leaf {
+  fill: var(--cc-color-paper-100);
+}
+
+.veg-word {
+  font-size: 0.9em;
+  color: var(--cc-color-bark-700);
+  overflow-wrap: break-word;
+}

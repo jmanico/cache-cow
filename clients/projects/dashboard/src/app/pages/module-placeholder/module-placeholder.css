@@ -1,0 +1,5 @@
+.page-title {
+  font-size: var(--cc-type-size-3);
+  font-weight: var(--cc-weight-subhead);
+  margin: 0 0 16px;
+}

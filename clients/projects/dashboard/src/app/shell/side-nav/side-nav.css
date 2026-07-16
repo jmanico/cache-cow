@@ -1,0 +1,50 @@
+/*
+ * Pit-theme nav via tokens only (DESIGN.md §12): Pitpaper text on Pit,
+ * cache-green for the active/good state, Smoke for neutral edges.
+ * Compact staff-tool density: 40px rows (DESIGN.md §12).
+ */
+.side-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.side-nav-link {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 16px;
+  color: var(--cc-color-pitpaper-100);
+  text-decoration: none;
+  font-weight: var(--cc-weight-ui-label);
+  border-left: 2px solid transparent;
+}
+
+.side-nav-link:hover {
+  border-left-color: var(--cc-color-smoke-400);
+}
+
+/* Cache green on Pit: 6.7:1, passes AA (DESIGN.md §3.2). */
+.side-nav-link.active {
+  color: var(--cc-color-cache-500);
+  border-left-color: var(--cc-color-cache-500);
+}
+
+.awaiting-config {
+  padding: 16px;
+  border: 1px solid var(--cc-color-smoke-400);
+  border-radius: 4px;
+  margin: 0 8px;
+}
+
+.awaiting-config-title {
+  font-size: var(--cc-type-size-1);
+  font-weight: var(--cc-weight-subhead);
+  margin: 0 0 8px;
+}
+
+.awaiting-config-body {
+  margin: 0;
+  color: var(--cc-color-smoke-400);
+  font-size: 0.85em;
+}

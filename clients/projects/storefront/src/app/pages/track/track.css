@@ -1,0 +1,46 @@
+/* Track page layout (DESIGN.md 6). Tokens only (Dependency rule 8). */
+.track {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 32px 24px 64px;
+}
+
+.track-title {
+  margin: 0 0 24px;
+  font-family: var(--cc-font-display), serif;
+  font-weight: var(--cc-weight-body);
+  font-size: var(--cc-type-size-6);
+  line-height: 1.15;
+  color: var(--cc-color-char-900);
+  overflow-wrap: break-word;
+}
+
+:lang(ja) .track-title {
+  font-family: var(--cc-font-display-ja-jp), sans-serif;
+  font-weight: var(--cc-weight-display-ja-jp);
+  border-bottom: 6px solid var(--cc-color-ember-500);
+  padding-bottom: 8px;
+  display: inline-block;
+}
+
+:lang(hi) .track-title {
+  font-family: var(--cc-font-display-hi-in), sans-serif;
+  font-weight: var(--cc-weight-display-hi-in);
+  border-bottom: 6px solid var(--cc-color-ember-500);
+  padding-bottom: 8px;
+  display: inline-block;
+}
+
+.track-message {
+  margin: 0;
+  color: var(--cc-color-bark-700);
+}
+
+@media (max-width: 480px) {
+  .track {
+    padding: 24px 16px 48px;
+  }
+  .track-title {
+    font-size: var(--cc-type-size-5);
+  }
+}
