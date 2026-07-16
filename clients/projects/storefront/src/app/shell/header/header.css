@@ -63,9 +63,57 @@
   max-width: 100%;
 }
 
+/* Navigation: primary + the Our Story group. Which pages land in which is
+ * policy data (CC-MKT-005) — the styling is placement-agnostic. */
+.primary-nav,
+.our-story-nav {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  min-width: 0;
+}
+
+.nav-group-label {
+  margin: 0;
+  font-family: var(--cc-font-body), sans-serif;
+  font-weight: var(--cc-weight-ui-label);
+  font-size: 0.8em;
+  color: var(--cc-color-bark-700);
+  overflow-wrap: break-word;
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  min-width: 0;
+}
+
+.nav-item {
+  min-width: 0;
+}
+
+.nav-link {
+  color: var(--cc-color-char-900);
+  font-weight: var(--cc-weight-ui-label);
+  text-decoration: none;
+  /* No nowrap: labels wrap at 130% expansion (CC-I18N-005). */
+  overflow-wrap: break-word;
+}
+
+.nav-link:hover {
+  color: var(--cc-color-ember-700);
+  text-decoration: underline;
+}
+
 /* Visible focus: 2px Ember outline on light surfaces (DESIGN.md 13). */
 .switcher-select:focus-visible,
-.logo-link:focus-visible {
+.logo-link:focus-visible,
+.nav-link:focus-visible {
   outline: 2px solid var(--cc-color-ember-500);
   outline-offset: 2px;
 }

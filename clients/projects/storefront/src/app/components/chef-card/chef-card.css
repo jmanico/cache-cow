@@ -1,0 +1,81 @@
+/* Chef card (DESIGN.md 6/7): Butcher card on Paper page, 12px radius, 1px
+ * Smoke border, light shadow only. Tokens only (Dependency rule 8). */
+.chef-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--cc-color-butcher-300);
+  border: 1px solid var(--cc-color-smoke-400);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgb(34 24 18 / 8%);
+}
+
+/* Portrait placeholder (DESIGN.md 8.6 photography direction is open). */
+.chef-portrait {
+  aspect-ratio: 4 / 5;
+  border-radius: 8px;
+  background: var(--cc-color-paper-100);
+  border: 1px solid var(--cc-color-smoke-400);
+}
+
+/* Name: Archivo 700 (DESIGN.md 4.1 subheads). */
+.chef-name {
+  margin: 0;
+  font-family: var(--cc-font-body), sans-serif;
+  font-weight: var(--cc-weight-subhead);
+  font-size: var(--cc-type-size-2);
+  color: var(--cc-color-char-900);
+  overflow-wrap: break-word; /* 130% expansion budget (CC-I18N-005) */
+}
+
+.chef-specialty,
+.chef-markets {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  min-width: 0;
+}
+
+/* Field labels: UI label weight (DESIGN.md 4.1). */
+.chef-field-label {
+  font-weight: var(--cc-weight-ui-label);
+  color: var(--cc-color-bark-700);
+  font-size: 0.8em;
+  overflow-wrap: break-word;
+}
+
+.chef-specialty-text {
+  color: var(--cc-color-char-900);
+  overflow-wrap: break-word;
+}
+
+.chef-bio {
+  margin: 0;
+  color: var(--cc-color-char-900);
+  overflow-wrap: break-word;
+}
+
+/* Market chips: Paper on Butcher, plain text label (never colour alone). */
+.chef-market {
+  font-family: var(--cc-font-data), monospace;
+  font-size: 0.8em;
+  color: var(--cc-color-char-900);
+  background: var(--cc-color-paper-100);
+  border: 1px solid var(--cc-color-smoke-400);
+  border-radius: 4px;
+  padding: 2px 8px;
+  overflow-wrap: break-word;
+}
+
+/* Devanagari matra clearance (DESIGN.md 4.2). */
+:lang(hi) .chef-bio,
+:lang(hi) .chef-specialty-text {
+  line-height: 1.7;
+}
+
+:lang(ja) .chef-bio {
+  line-height: 1.75;
+}

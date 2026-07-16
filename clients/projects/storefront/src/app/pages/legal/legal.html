@@ -1,0 +1,49 @@
+<!--
+  Legal document (CC-CNT-005). Long-form reading on Paper (DESIGN.md §3.1).
+  Zero puns (§5.4). Structured plain-text sections only — no raw-HTML sink.
+-->
+@switch (state().kind) {
+  @case ('loading') {
+    <section class="legal">
+      <p class="legal-message" data-testid="legal-loading">{{ i18n.t('legal.loading') }}</p>
+    </section>
+  }
+  @case ('error') {
+    <section class="legal">
+      <!-- Generic error; never a fallback market's legal text (Failure Behavior). -->
+      <p class="legal-message" data-testid="legal-error">{{ i18n.t('legal.error') }}</p>
+    </section>
+  }
+  @case ('notFound') {
+    <!-- Document not in this market's legal content set (CC-CNT-005): the
+         404 BODY. The HTTP 404 STATUS is server-owned (issue 026). -->
+    <app-not-found data-testid="legal-not-found" />
+  }
+  @case ('ready') {
+    @if (doc(); as doc) {
+      <article class="legal" data-testid="legal-doc" [attr.data-doc]="doc.id">
+        <h1 class="legal-title" data-testid="legal-title">{{ doc.title }}</h1>
+
+        <!-- Version identity of the served text (CC-CNT-005 "versioned"):
+             an issued version is immutable; corrections are new versions. -->
+        <p class="legal-version">
+          <span class="legal-version-item" data-testid="legal-version">
+            {{ i18n.t('legal.versionLabel', { version: doc.version }) }}
+          </span>
+          <span class="legal-version-item" data-testid="legal-effective-date">
+            {{ i18n.t('legal.effectiveDateLabel', { date: effectiveDateText() }) }}
+          </span>
+        </p>
+
+        @for (section of doc.sections; track section.heading) {
+          <section class="legal-section" data-testid="legal-section">
+            <h2 class="legal-heading">{{ section.heading }}</h2>
+            @for (paragraph of section.paragraphs; track paragraph) {
+              <p class="legal-paragraph">{{ paragraph }}</p>
+            }
+          </section>
+        }
+      </article>
+    }
+  }
+}

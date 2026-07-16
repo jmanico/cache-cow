@@ -1,0 +1,96 @@
+/* Legal document: long-form reading on Paper (DESIGN.md 3.1), narrow measure.
+ * Tokens only (Dependency rule 8). */
+.legal {
+  max-width: 75ch;
+  margin-inline: auto;
+  padding: 32px 24px 64px;
+  background: var(--cc-color-paper-100);
+}
+
+.legal-title {
+  margin: 0 0 12px;
+  font-family: var(--cc-font-display), serif;
+  font-weight: var(--cc-weight-body);
+  font-size: var(--cc-type-size-5);
+  line-height: 1.2;
+  color: var(--cc-color-char-900);
+  overflow-wrap: break-word;
+}
+
+/* ja-JP / hi-IN display treatment (DESIGN.md 4.2). */
+:lang(ja) .legal-title {
+  font-family: var(--cc-font-display-ja-jp), sans-serif;
+  font-weight: var(--cc-weight-display-ja-jp);
+  border-bottom: 6px solid var(--cc-color-ember-500);
+  padding-bottom: 8px;
+  display: inline-block;
+}
+
+:lang(hi) .legal-title {
+  font-family: var(--cc-font-display-hi-in), sans-serif;
+  font-weight: var(--cc-weight-display-hi-in);
+  border-bottom: 6px solid var(--cc-color-ember-500);
+  padding-bottom: 8px;
+  display: inline-block;
+}
+
+/* Version + effective date: data role, Plex Mono (DESIGN.md 4.1). */
+.legal-version {
+  margin: 0 0 32px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-family: var(--cc-font-data), monospace;
+  font-size: 0.8em;
+  color: var(--cc-color-bark-700);
+}
+
+.legal-version-item {
+  overflow-wrap: break-word;
+}
+
+.legal-message {
+  margin: 0;
+  color: var(--cc-color-bark-700);
+}
+
+.legal-section {
+  margin-bottom: 32px;
+}
+
+.legal-heading {
+  margin: 0 0 12px;
+  font-family: var(--cc-font-body), sans-serif;
+  font-weight: var(--cc-weight-subhead);
+  font-size: var(--cc-type-size-3);
+  color: var(--cc-color-char-900);
+  overflow-wrap: break-word;
+}
+
+.legal-paragraph {
+  margin: 0 0 16px;
+  color: var(--cc-color-char-900);
+  overflow-wrap: break-word;
+}
+
+/* de-DE: hyphenation for compounds (DESIGN.md 4.2), keyed off lang. */
+:lang(de) .legal-paragraph {
+  hyphens: auto;
+}
+
+:lang(ja) .legal-paragraph {
+  line-height: 1.75;
+}
+
+:lang(hi) .legal-paragraph {
+  line-height: 1.7;
+}
+
+@media (max-width: 480px) {
+  .legal {
+    padding: 24px 16px 48px;
+  }
+  .legal-title {
+    font-size: var(--cc-type-size-4);
+  }
+}

@@ -31,6 +31,44 @@
   color: var(--cc-color-ember-500);
 }
 
+/* Legal content set (CC-CNT-005): one flat list, every item at the same
+ * level — in DE that is where Impressum and Widerrufsbelehrung sit, first
+ * class rather than buried in secondary navigation (DESIGN.md 8.4). */
+.legal-nav {
+  margin-top: 24px;
+}
+
+.legal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+.legal-item {
+  min-width: 0;
+}
+
+.legal-link {
+  color: var(--cc-color-paper-100);
+  font-weight: var(--cc-weight-ui-label);
+  text-decoration: none;
+  overflow-wrap: break-word; /* 130% expansion wraps, never clips (CC-I18N-005) */
+}
+
+.legal-link:hover {
+  text-decoration: underline;
+}
+
+/* Visible focus on Char: Paper outline keeps the 2px marker visible where an
+ * Ember outline would sit at 3.7:1 against the footer (DESIGN.md 3.2/13). */
+.legal-link:focus-visible {
+  outline: 2px solid var(--cc-color-paper-100);
+  outline-offset: 2px;
+}
+
 .legal {
   margin: 24px 0 0;
   font-size: var(--cc-type-size-1);

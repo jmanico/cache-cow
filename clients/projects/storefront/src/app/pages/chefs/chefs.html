@@ -1,0 +1,26 @@
+<section class="chefs">
+  <h1 class="chefs-title">{{ i18n.t('chefs.title') }}</h1>
+  <p class="chefs-lede">{{ i18n.t('chefs.lede') }}</p>
+
+  @switch (state().kind) {
+    @case ('loading') {
+      <p class="chefs-message" data-testid="chefs-loading">{{ i18n.t('chefs.loading') }}</p>
+    }
+    @case ('error') {
+      <!-- Generic error: what happened and what to do next (DESIGN.md §9);
+           no raw error bodies (SECURITY.md, Logging rules 1/7). -->
+      <p class="chefs-message" data-testid="chefs-error">{{ i18n.t('chefs.error') }}</p>
+    }
+    @case ('ready') {
+      @if (roster(); as roster) {
+        <ul class="chefs-grid" data-testid="chefs-grid">
+          @for (chef of roster.roster; track chef.id) {
+            <li class="chefs-cell">
+              <app-chef-card [chef]="chef" />
+            </li>
+          }
+        </ul>
+      }
+    }
+  }
+</section>

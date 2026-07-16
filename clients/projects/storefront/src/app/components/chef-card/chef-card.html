@@ -1,0 +1,28 @@
+<!--
+  Chef card (DESIGN.md §7). All content is typed plain text bound through
+  text interpolation — no raw-HTML sink anywhere (CC-SEC-002).
+-->
+<article class="chef-card" data-testid="chef-card" [attr.data-chef]="chef().id">
+  <!-- Portrait placeholder pending real photography (DESIGN.md §8.6, open).
+       The frame is decorative; the name below is the accessible label. -->
+  <div class="chef-portrait" data-testid="chef-portrait" aria-hidden="true"></div>
+
+  <h2 class="chef-name" data-testid="chef-name">{{ chef().name }}</h2>
+
+  <p class="chef-specialty">
+    <span class="chef-field-label">{{ i18n.t('chefs.specialtyLabel') }}</span>
+    <span class="chef-specialty-text" data-testid="chef-specialty">{{ chef().specialty }}</span>
+  </p>
+
+  <!-- Localized bio (CC-CNT-001): server-localized, server-sanitized. -->
+  <p class="chef-bio" data-testid="chef-bio">{{ chef().bio }}</p>
+
+  <!-- Market flag(s) (DESIGN.md §7). Text labels, not flag emoji/images:
+       status and identity are never conveyed by a graphic alone (§13). -->
+  <p class="chef-markets">
+    <span class="chef-field-label">{{ i18n.t('chefs.marketsLabel') }}</span>
+    @for (market of chef().markets; track market) {
+      <span class="chef-market" data-testid="chef-market">{{ i18n.t(marketNameKey(market)) }}</span>
+    }
+  </p>
+</article>

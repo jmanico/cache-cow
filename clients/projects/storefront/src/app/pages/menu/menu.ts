@@ -10,13 +10,21 @@
  * the response itself contains no non-veg SKU in any state (AC-05 — server
  * exclusion, issue 025).
  *
+ * The `cut` QUERY PARAM seeds the cut filter, so the Meet our Cuts diagram
+ * (issue 075, CC-CNT-003) can link here with a region selected. It is
+ * untrusted client input like any other: an unrecognized value is rejected
+ * (no filter), never passed through — and it seeds the SERVER-executed query
+ * exactly like the select control does, so it opens no client-side filtering
+ * path around the gated catalog (CC-MKT-003).
+ *
  * Failure behavior (fail closed): a response that fails schema validation or
  * a seam error renders the generic error state — never partial or guessed
  * catalog data (SECURITY.md, Input validation rule 1; Logging rules 2/7).
  */
 
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { CatalogApi } from '../../catalog/catalog.api';
 import { CatalogListing, CatalogQuery, Cut, CUTS } from '../../catalog/catalog.types';
@@ -40,12 +48,35 @@ type ListingState =
 export class Menu {
   private readonly api = inject(CatalogApi);
   private readonly context = inject(TransactingContext);
+  private readonly route = inject(ActivatedRoute);
   protected readonly i18n = inject(I18nService);
 
   /** Server-executed filter parameters (issue 066 AC-03). */
   private readonly query = signal<CatalogQuery>({ cut: null, vegOnly: false });
   protected readonly vegOnly = computed(() => this.query().vegOnly);
   protected readonly activeCut = computed(() => this.query().cut);
+
+  /** ?cut= from the Cuts diagram (issue 075). Validated against the declared
+   * vocabulary; anything else is ignored (no filter), never forwarded. */
+  private readonly cutParam = toSignal(
+    this.route.queryParamMap.pipe(
+      map((params) => {
+        const value = params.get('cut');
+        return value !== null && (CUTS as readonly string[]).includes(value)
+          ? (value as Cut)
+          : null;
+      }),
+    ),
+    { initialValue: null },
+  );
+
+  constructor() {
+    // Seed the filter from the URL, then let the controls take over.
+    effect(() => {
+      const cut = this.cutParam();
+      this.query.update((q) => (q.cut === cut ? q : { ...q, cut }));
+    });
+  }
 
   /** Re-query when the filter or the transacting market changes. */
   private readonly request = computed(() => ({

@@ -1,0 +1,31 @@
+<!--
+  Meet our Cows (DESIGN.md §8.1). Sincere mascot framing, identical herd in
+  every market. Deliberately contains NO product link (CC-CNT-002), no
+  butchery content, and no link to the Cuts experience (§8.1 separation rule).
+-->
+<section class="cows">
+  <h1 class="cows-title">{{ i18n.t('cows.title') }}</h1>
+  <p class="cows-lede">{{ i18n.t('cows.lede') }}</p>
+
+  @switch (state().kind) {
+    @case ('loading') {
+      <p class="cows-message" data-testid="cows-loading">{{ i18n.t('cows.loading') }}</p>
+    }
+    @case ('error') {
+      <!-- Generic error: what happened and what to do next (DESIGN.md §9);
+           no mascots in error states (§9) — hence no illustration here. -->
+      <p class="cows-message" data-testid="cows-error">{{ i18n.t('cows.error') }}</p>
+    }
+    @case ('ready') {
+      @if (herd(); as herd) {
+        <ul class="cows-grid" data-testid="cows-grid">
+          @for (cow of herd.herd; track cow.id) {
+            <li class="cows-cell">
+              <app-cow-card [cow]="cow" />
+            </li>
+          }
+        </ul>
+      }
+    }
+  }
+</section>

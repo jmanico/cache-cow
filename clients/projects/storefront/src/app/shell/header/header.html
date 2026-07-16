@@ -14,6 +14,42 @@
       [alt]="i18n.t('shell.header.logoAlt')"
     />
   </a>
+  @if (policy(); as policy) {
+    <!-- Placement comes from POLICY DATA (CC-MKT-005/006): primary nav vs.
+         the Our Story group, and which pages exist at all in this market.
+         No market conditional lives here. If the policy is unresolved, this
+         whole block renders nothing (fail closed). -->
+    <nav class="primary-nav" data-testid="primary-nav" [attr.aria-label]="i18n.t('shell.nav.primaryLabel')">
+      <ul class="nav-list">
+        @for (page of policy.primary; track page) {
+          <li class="nav-item">
+            <a class="nav-link" [attr.data-nav]="page" [routerLink]="navRoute(page)">
+              {{ i18n.t(navLabelKey(page)) }}
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    @if (policy.ourStory.length > 0) {
+      <!-- "Our Story" group: the non-IN home of Meet our Cows (CC-MKT-005).
+           A labelled group, not a JS dropdown — keyboard-operable by
+           construction (DESIGN.md §13). -->
+      <nav class="our-story-nav" data-testid="our-story-nav" [attr.aria-label]="i18n.t('shell.nav.ourStoryLabel')">
+        <h2 class="nav-group-label">{{ i18n.t('shell.nav.ourStoryLabel') }}</h2>
+        <ul class="nav-list">
+          @for (page of policy.ourStory; track page) {
+            <li class="nav-item">
+              <a class="nav-link" [attr.data-nav]="page" [routerLink]="navRoute(page)">
+                {{ i18n.t(navLabelKey(page)) }}
+              </a>
+            </li>
+          }
+        </ul>
+      </nav>
+    }
+  }
+
   <nav class="switchers" aria-label="Market and language">
     <!-- Two independent controls (DESIGN.md 7): market drives catalog/currency/
          compliance; language drives strings. Never inferred from each other. -->

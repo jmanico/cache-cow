@@ -1,0 +1,52 @@
+<!--
+  Meet our Cuts (DESIGN.md §7/§13). Technical diagram + list equivalent, both
+  from one region array. No mascot illustrations and no herd content anywhere
+  on this page (§8.1 separation rule).
+-->
+@switch (state().kind) {
+  @case ('loading') {
+    <section class="cuts">
+      <p class="cuts-message" data-testid="cuts-loading">{{ i18n.t('cuts.lede') }}</p>
+    </section>
+  }
+  @case ('gated') {
+    <!-- Policy says this experience does not exist in the transacting market
+         (CC-MKT-005), or the policy could not be resolved: render the 404
+         BODY. The HTTP 404 STATUS is server-owned (issues 025/026) — this is
+         a mirror of the server's decision, not the enforcement point. -->
+    <app-not-found data-testid="cuts-gated" />
+  }
+  @case ('ready') {
+    <section class="cuts">
+      <h1 class="cuts-title">{{ i18n.t('cuts.title') }}</h1>
+      <p class="cuts-lede">{{ i18n.t('cuts.lede') }}</p>
+
+      <app-cut-diagram (selectCut)="onSelectCut($event)" />
+
+      <!-- Accessible list equivalent (CC-CNT-003; DESIGN.md §13), exposed to
+           ALL users — an equal path to the same filtering, never a hidden
+           screen-reader-only fallback. Mirrors the diagram's regions by
+           rendering from the same array. -->
+      <section class="cuts-list-section" data-testid="cuts-list">
+        <h2 class="cuts-list-title">{{ i18n.t('cuts.listTitle') }}</h2>
+        <p class="cuts-list-hint">{{ i18n.t('cuts.listHint') }}</p>
+        <ul class="cuts-list">
+          @for (region of regions; track region.cut) {
+            <li class="cuts-list-item">
+              <button
+                type="button"
+                class="cuts-list-button"
+                data-testid="cuts-list-button"
+                [attr.data-cut]="region.cut"
+                (click)="onSelectCut(region.cut)"
+              >
+                <span class="cuts-list-number">{{ region.number }}</span>
+                <span class="cuts-list-name">{{ i18n.t(cutNameKey(region.cut)) }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+    </section>
+  }
+}

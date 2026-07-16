@@ -1,0 +1,47 @@
+<!--
+  Store locator (DESIGN.md §7/§10) — LIST ONLY.
+
+  There is deliberately no map here: no map container, no tile <img>, no
+  provider <script>, no <iframe>. The map half of DESIGN.md §7 is blocked on
+  an open human decision (no provider is named in the specs, and hosted maps
+  collide with the third-party-CDN ban and the exact-origin CSP) — issue 078
+  Open Questions / epic open question 11. The list is the accessible
+  foundation any future map must enhance, not replace (§13).
+-->
+<section class="stores">
+  <h1 class="stores-title">{{ i18n.t('stores.title') }}</h1>
+  <p class="stores-lede">{{ i18n.t('stores.lede') }}</p>
+
+  @switch (state().kind) {
+    @case ('loading') {
+      <p class="stores-message" data-testid="stores-loading">{{ i18n.t('stores.loading') }}</p>
+    }
+    @case ('error') {
+      <!-- Generic error; never an unfiltered or cross-market list. -->
+      <p class="stores-message" data-testid="stores-error">{{ i18n.t('stores.error') }}</p>
+    }
+    @case ('ready') {
+      @if (locations(); as locations) {
+        @if (locations.locations.length === 0) {
+          <p class="stores-message" data-testid="stores-empty">{{ i18n.t('stores.empty') }}</p>
+        } @else {
+          <ul class="stores-list" data-testid="stores-list" [attr.aria-label]="i18n.t('stores.listLabel')">
+            @for (location of locations.locations; track location.id) {
+              <li class="stores-item" data-testid="store-item" [attr.data-store]="location.id">
+                <h2 class="store-retailer" data-testid="store-retailer">{{ location.retailer }}</h2>
+                <!-- Address lines in the order the server sent them: the
+                     per-market address format is server-side (CC-ORD-002). -->
+                <address class="store-address" data-testid="store-address">
+                  @for (line of location.addressLines; track line) {
+                    <span class="store-address-line">{{ line }}</span>
+                  }
+                  <span class="store-locality" data-testid="store-locality">{{ location.locality }}</span>
+                </address>
+              </li>
+            }
+          </ul>
+        }
+      }
+    }
+  }
+</section>

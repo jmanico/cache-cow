@@ -1,0 +1,49 @@
+<!--
+  Interactive steer diagram (DESIGN.md §7/§13). role="group" names the whole
+  interactive; each numbered region is a REAL button with an ARIA name, so
+  the diagram is keyboard operable with a logical tab order (§13).
+  Zero mascot DNA (§8.1 separation rule): technical line art only.
+  CSP-friendly: no inline styles, no inline handlers.
+-->
+<div class="cut-diagram" role="group" [attr.aria-label]="i18n.t('cuts.diagramLabel')">
+  <!-- Line-art side-profile steer, Char linework on Paper (DESIGN.md §7).
+       PLACEHOLDER geometry: the butcher-diagram base art is an open asset
+       decision (§15). Decorative — the region buttons carry the semantics. -->
+  <svg
+    class="cut-art"
+    data-testid="cut-art"
+    viewBox="0 0 400 240"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <!-- Body outline -->
+    <path
+      class="cut-line"
+      d="M76 96 L76 168 L96 168 L100 200 L112 200 L112 168 L200 168 L200 200 L212 200 L212 168 L288 168 L292 200 L304 200 L304 160 L320 132 L316 96 Z"
+    />
+    <!-- Head and neck -->
+    <path class="cut-line" d="M76 96 L52 84 L36 92 L32 116 L48 128 L76 122" />
+    <!-- Tail -->
+    <path class="cut-line" d="M316 96 L332 84 L340 104 L332 128" />
+    <!-- Region dividers: the cut seams (numbered by the buttons below) -->
+    <path class="cut-line" d="M120 96 L120 168" />
+    <path class="cut-line" d="M188 96 L188 168" />
+    <path class="cut-line" d="M96 138 L188 138" />
+  </svg>
+
+  @for (region of regions; track region.cut) {
+    <!-- Real button: named, keyboard-operable, visible focus (§13). The
+         visible content is the Plex Mono region number (§7); the ARIA name
+         carries the meaning. -->
+    <button
+      type="button"
+      class="cut-region"
+      data-testid="cut-region"
+      [attr.data-cut]="region.cut"
+      [attr.aria-label]="regionLabel(region.cut)"
+      (click)="onSelect(region.cut)"
+    >
+      <span class="cut-region-number" aria-hidden="true">{{ region.number }}</span>
+    </button>
+  }
+</div>
